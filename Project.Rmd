@@ -1,0 +1,20 @@
+---
+title: "Project"
+author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
+date: "17-05-2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+```{r}
+load("dataset.RData")
+
+
+```
+
+.
