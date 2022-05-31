@@ -11,10 +11,33 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
+Once we have obtained our dataset, it is time to apply a couple of tweaks to have our data ready for the analysis. First, we are going to change the type of a few variables:
+
+- `trending_date` from character to Date class
+- `category_id` from integer to factor class (categorical variable)
+- `country_id` from integer to factor class (categorical variable)
+- `comments_disables` from character to factor class (binary variable)
+
+In order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles.
+
+Besides that and due to the fact that time-series is not allowed for the purpose of this project, we are going to consider the last registered date time observation for a specific `video_id` and `country_id`. 
+
+Finally, we are removing those variable we are not going to use that are `trending_date` and `tags`.
+
 ```{r}
 load("dataset.RData")
-
-
+data <- youtube %>% 
+  mutate(
+    trending_date = as.Date(trending_date, '%y.%d.%m'),
+    category_id = as.factor(category_id),
+    country_id = as.factor(country_id),
+    comments_disabled = factor(ifelse(is.na(comments_disabled), NA, ifelse(comments_disabled=="True", 1, 0))),
+    views = views/1000
+    ) %>% 
+  group_by(video_id, country_id) %>% 
+  slice(which.max(trending_date)) %>% 
+  select(-c(trending_date, tags)) %>% 
+  data.frame
 ```
 
-.
+
