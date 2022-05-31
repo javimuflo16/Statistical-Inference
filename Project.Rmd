@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 # Introduction
@@ -31,13 +32,13 @@ data <- youtube %>%
     trending_date = as.Date(trending_date, '%y.%d.%m'),
     category_id = as.factor(category_id),
     country_id = as.factor(country_id),
-    comments_disabled = factor(ifelse(is.na(comments_disabled), NA, ifelse(comments_disabled=="True", 1, 0))),
-    views = views/1000
+    comments_disabled = factor(ifelse(is.na(comments_disabled), NA, ifelse(comments_disabled=="True", 1, 0)))
     ) %>% 
   group_by(video_id, country_id) %>% 
   slice(which.max(trending_date)) %>% 
   select(-c(trending_date, tags)) %>% 
   data.frame
+data$views = data$views/1000
 ```
 
 
