@@ -98,12 +98,12 @@ We would like to extrapolate our results (top 200 trending videos per day) to th
 
 The dataset has 8 dimensions, these variables are:
 
-- `video_id` (character variable): unique identifier for a YouTube video
-- `category_id` (categorical variable): unique identifier for video's category
-- `view` (continuous variable): number of views, measured in miles, up to the record's date for a specific video and country
-- `likes` (discrete variable): number of likes up to the record's date for a specific video and country
-- `dislikes` (discrete variable): number of dislikes up to the record's date for a specific video and country
-- `comments_count` (discrete variable): number of comments up to the record's date for a specific video and country
-- `comments_disabled` (binary variable): whether the comments are enabled or not 
-- `country_id` (categorical variable): unique identifier for the country where the video is hosted (United States of America (`US`), Canada (`CA`), Mexico (`MX`), Japan (`JP`), South Korea (`KR`), India (`IN`), Russia (`RU`), United Kingdom (`GB`), France (`FR`) and Germany (`DE`)).
+- `video_id` (qualitative nominal variable) unique identifier for a YouTube video, it is a string of characters of length 11.
+- `category_id` (qualitative nominal variable) unique identifier for video's category. The mapping between categories and ids is the following one: Film & Animation (`1`), Autos & Vehicles (`2`), Music (`10`), Pets & Animals (`15`), Sports (`17`), Travel & Events (`19`), Gaming (`20`), People & Blogs (`22`), Comedy (`23`), Entertainment (`24`), News & Politics (`25`), Howto & Style (`26`), Education (`27`), Science & Technology (`28`), Nonprofits & Activism (`29`), Movies (`30`), Shows (`43`) and Trailers (`44`).
+- `view` (quantitative continuous variable) number of views, measured in miles, up to the last record's date for a specific video and country.
+- `likes` (quantitative discrete variable) number of likes up to the last record's date for a specific video and country
+- `dislikes` (quantitative discrete variable) number of dislikes up to the last record's date for a specific video and country
+- `comments_count` (quantitative discrete variable) number of comments up to the last record's date for a specific video and country.
+- `comments_disabled` (qualitative binary variable) whether the comments are enabled or not, represented as `0` if it is false and `1` if it is true.
+- `country_id` (qualitative nominal variable) unique identifier for the country where the video is hosted. It consists a string of characters of length 2. The mapping between countries and ids is the following one: United States of America (`US`), Canada (`CA`), Mexico (`MX`), Japan (`JP`), South Korea (`KR`), India (`IN`), Russia (`RU`), United Kingdom (`GB`), France (`FR`) and Germany (`DE`).
 
