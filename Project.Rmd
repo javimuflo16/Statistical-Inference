@@ -1,6 +1,8 @@
 ---
-title: "Top Trending YouTube Videos"
-subtitle: "Statistical Inference - Master in Statistics for Data Science"
+title: |
+    ![](logo.png){width=1in}  
+    Trend Videos
+subtitle: "Statistical Inference | Master in Statistics for Data Science"
 author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
 date: "17-05-2022"
 output: 
@@ -20,13 +22,13 @@ load("dataset.RData")
 
 ## Topic and motivation
 
-The aim of this project is to analyze what are the most favorite YouTube videos and their categories associated for a specific country. These trends are measured with the following quantifiers: number of accumulated views, number of accumulated likes, number of accumulated dislikes and number of accumulated comments. Therefore, the higher the value of any of these parameters, the more likely to be in the top of the trending videos for that country.
+The aim of this project is to analyze what are the most favorite YouTube videos and their categories associated. These trends are measured with the following quantifiers: number of accumulated views, number of accumulated likes, number of accumulated dislikes and number of accumulated comments. Therefore, the higher the value of any of these parameters, the more likely to be in the top of the trendiest videos.
 
 ## Description of the dataset
 
 Data comes from [Kaggle](https://www.kaggle.com/datasets/datasnaek/youtube-new) separate by countries and we has merged all of them into a single csv file. As it is commented in the previous website, the information was obtained through the [YouTube API](https://developers.google.com/youtube/v3). 
 
-The csv file we updated at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Each country does not contain the same period of time and it also depends on the video itself. Let's see the data groupped, aggregating the dates for each group:
+The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped, aggregating the dates for each group:
 
 
 ```{r results='hide'}
@@ -41,18 +43,18 @@ diff_dates <- youtube %>%
 knitr::kable(head(diff_dates))
 ```
 
-Then it is clear that the record dates depend on the `video_id` and the `country_id`. For example, in the original data the interval times are for Canada, US, Germany, FR, UK, India, South Korea, Mexico and Russia from 14-11-2017 to 14-06-2018 and for Japan from 07-02-2018 to 14-06-2018.
+Then it is clear that the record dates depend on the `video_id` and the `country_id`. For example, in the original data the interval times for Canada, US, Germany, FR, UK, India, South Korea, Mexico and Russia are from 14-11-2017 to 14-06-2018 and for Japan from 07-02-2018 to 14-06-2018.
 
 Therefore, due to the fact that time-series is not allowed for the purpose of this project, we are going to consider the last registered date time observation for a specific `video_id` and `country_id`. 
 
 Besides that, we are applying a couple of tweaks to have our data ready for the analysis. First, we are going to modify the type of a few variables:
 
 - `trending_date` from character to Date class
-- `category_id` from integer to factor class (categorical variable)
-- `country_id` from integer to factor class (categorical variable)
-- `comments_disables` from character to factor class (binary variable)
+- `category_id` from integer to factor class
+- `country_id` from integer to factor class
+- `comments_disables` from character to factor class
 
-Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are removing the variables that we are not going to use such as `trending_date` and `tags`.
+Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
 
 ```{r}
 data <- youtube %>% 
@@ -74,11 +76,27 @@ Our final dataset contains 207,148 rows.
 
 ## Description of the population
 
-We would like to extrapolate our results to the whole population of videos for each country we have in the dataset. The total number of videos in YouTube at the time where the last observation was recorded vary based on the country.
+Observing some blogs about the YouTube's figures for 2018, we can say that the total number of YouTube videos approximately was around 8 billion videos. A significantly large population size comparing with the sample size of our data that is just 207,148 observations, then the population size is totally different from the sample size.
+
+The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. Let's obtain the number of observations we have for each country.
+
+```{r results='hide'}
+count <- data %>% 
+  group_by(country_id) %>% 
+  summarise(n = n())
+```
+
+```{r echo=FALSE}
+knitr::kable(count)
+```
+
+We could see in the table above that UK and US have a smaller number of observations, nevertheless it does not mean that they have less videos, it could be that they have a large number of videos repeated (consecutive days appeared in the 200 trendiest videos).
+
+We would like to extrapolate our results (top 200 trending videos per day) to the whole population of YouTube videos. At the beginning just for the whole YouTube and later on segmented by country.
 
 ## Description of the variables
 
-The datasets has 8 dimensions, these variables are:
+The dataset has 8 dimensions, these variables are:
 
 - `video_id` (character variable): unique identifier for a YouTube video
 - `category_id` (categorical variable): unique identifier for video's category
