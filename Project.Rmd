@@ -34,7 +34,7 @@ Data comes from [Kaggle](https://www.kaggle.com/datasets/datasnaek/youtube-new) 
 The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped, aggregating the dates for each group:
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 diff_dates <- youtube %>% 
   group_by(country_id, video_id) %>% 
   mutate(trending_dates = paste0(trending_date, collapse = "|")) %>% 
@@ -59,7 +59,7 @@ Besides that, we are applying a couple of tweaks to have our data ready for the 
 
 Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
 
-```{r}
+```{r cache=TRUE}
 data <- youtube %>% 
   mutate(
     trending_date = as.Date(trending_date, '%y.%d.%m'),
@@ -86,7 +86,7 @@ Observing some blogs about the YouTube's figures for 2018, we can say that the t
 
 The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. Let's obtain the number of observations we have for each country.
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 count <- data %>% 
   group_by(country_id) %>% 
   summarise(n = n())
@@ -128,8 +128,7 @@ The number of factors of the variable `country_id` can be reduced using the cont
 
 Notice that for this last case, we should add the value of the quantifiers for the same video and different countries in the same continent.
 
-```{r results='hide'}
-# new category ids
+```{r results='hide', cache=TRUE}
 film_categories <- c(1, 23, 24, 30, 43, 44)
 education_categories <- c(25, 26, 27, 28, 29)
 leisure_categories <- c(2, 15, 17, 19, 29, 22)
@@ -139,7 +138,6 @@ new_category_ids <-
          ifelse(data$category_id %in% education_categories, "Education", 
                 ifelse(data$category_id %in% leisure_categories, "Leisure", "Music")))
 
-# new continent_id
 new_continent_ids <-
   ifelse(data$country_id %in% c("US", "CA", "MX"), "America", 
          ifelse(data$country_id %in% c("RU", "GB", "FR", "DE"), "Europe", "Asia"))
@@ -153,7 +151,6 @@ final_data <- data %>%
   summarize(comments_disabled=comments_disabled[1], 
             across(where(is.numeric), sum), .groups="keep") %>% 
   data.frame
-
 ```
 
 After the previous transformation, we have a dataset with 195,582 observations.
@@ -188,4 +185,30 @@ knitr::kable(stats_data, digits = 2, caption = "Stats Table") %>%
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
+
+Once we have analyzed the table above, we can conclude that all of the YouTube videos within the dataset at least contain 200 views, not occurring the same for the other three variables where data can have 0 likes, 0 dislikes or 0 comments. 
+
+Taking a look to the measures of centrality we obtain an idea of how it is the variability, for example, the variability is much larger for the variable `likes` than the variable `views` since the difference between the mean with respect the minimum value and the maximum value of the variable `views` is considerably smaller than the same calculation for the variable `likes`. In order to verify this assumption we just need to check the value of the standard deviation (a measure of variability), for the case we have just commented the value for the variable `views` is 4617.47 in contrast with the value of the variable `likes` that is 149734.44, which is considerably much larger.
+
+The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes` and `dislikes`- with a value greater than 3 the distribution is *leptokurtic* (heavier tails than a Normal distribution) and for the variable `comments_count` since the kurtosis is smaller than 3 the distribution is *platykurtic* (thinner tails than a Normal distribution). Let's check all of this visually thanks to the following plot.
+
+```{r echo=FALSE}
+par(mfrow=c(2,2))
+hist(final_data$views[final_data$views >= 0 & final_data$views < 750], 
+     breaks=seq(0, 750, by=25), main="", xlab="Num. views")
+title("Views", line=-1.5)
+hist(final_data$likes[final_data$likes >= 0 & final_data$likes < 8000],
+     breaks=seq(0, 8000, by=80), main="", xlab="Num. likes")
+title("Likes", line=-1.5)
+hist(final_data$dislikes[final_data$dislikes >= 0 & final_data$dislikes < 750],
+     breaks=seq(0, 750, by=25), main="", xlab="Num. dislikes")
+title("Dislikes", line=-1.5)
+hist(final_data$comment_count[final_data$comment_count >= 0 & 
+                                final_data$comment_count < 750],
+     breaks=seq(0, 750, by=25), main="", xlab="Num. comments")
+title("Comments", line=-1.5)
+```
+
+In the plot above, we can see clearly the difference that was pointed by the kurtosis value, the differences between the three *leptokurtic* distribution with respect the *platykurtic* distribution associated with the variable `comments_count`.
+
 
