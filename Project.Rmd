@@ -54,7 +54,7 @@ Besides that, we are applying a couple of tweaks to have our data ready for the 
 - `country_id` from integer to factor class
 - `comments_disables` from character to factor class
 
-Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
+Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
 
 ```{r}
 data <- youtube %>% 
@@ -69,6 +69,9 @@ data <- youtube %>%
   slice(which.max(trending_date)) %>% 
   select(-c(trending_date, tags)) %>% 
   data.frame
+data$comments_disabled = ifelse(is.na(data$comments_disabled), 
+                                ifelse(data$comment_count==0, 1, 0), 
+                                data$comments_disabled)
 data$views = data$views/1000
 ```
 
@@ -98,12 +101,69 @@ We would like to extrapolate our results (top 200 trending videos per day) to th
 
 The dataset has 8 dimensions, these variables are:
 
-- `video_id` (qualitative nominal variable) unique identifier for a YouTube video, it is a string of characters of length 11.
-- `category_id` (qualitative nominal variable) unique identifier for video's category. The mapping between categories and ids is the following one: Film & Animation (`1`), Autos & Vehicles (`2`), Music (`10`), Pets & Animals (`15`), Sports (`17`), Travel & Events (`19`), Gaming (`20`), People & Blogs (`22`), Comedy (`23`), Entertainment (`24`), News & Politics (`25`), Howto & Style (`26`), Education (`27`), Science & Technology (`28`), Nonprofits & Activism (`29`), Movies (`30`), Shows (`43`) and Trailers (`44`).
-- `view` (quantitative continuous variable) number of views, measured in miles, up to the last record's date for a specific video and country.
-- `likes` (quantitative discrete variable) number of likes up to the last record's date for a specific video and country
-- `dislikes` (quantitative discrete variable) number of dislikes up to the last record's date for a specific video and country
-- `comments_count` (quantitative discrete variable) number of comments up to the last record's date for a specific video and country.
-- `comments_disabled` (qualitative binary variable) whether the comments are enabled or not, represented as `0` if it is false and `1` if it is true.
-- `country_id` (qualitative nominal variable) unique identifier for the country where the video is hosted. It consists a string of characters of length 2. The mapping between countries and ids is the following one: United States of America (`US`), Canada (`CA`), Mexico (`MX`), Japan (`JP`), South Korea (`KR`), India (`IN`), Russia (`RU`), United Kingdom (`GB`), France (`FR`) and Germany (`DE`).
+- `video_id` (*qualitative nominal variable*) unique identifier for a YouTube video, it is a string of characters of length 11.
+- `category_id` (*qualitative nominal variable*) unique identifier for video's category. The mapping between categories and ids is the following one: Film & Animation (`1`), Autos & Vehicles (`2`), Music (`10`), Pets & Animals (`15`), Sports (`17`), Travel & Events (`19`), Gaming (`20`), People & Blogs (`22`), Comedy (`23`), Entertainment (`24`), News & Politics (`25`), Howto & Style (`26`), Education (`27`), Science & Technology (`28`), Nonprofits & Activism (`29`), Movies (`30`), Shows (`43`) and Trailers (`44`).
+- `view` (*quantitative continuous variable*) number of views, measured in miles, up to the last record's date for a specific video and country.
+- `likes` (*quantitative discrete variable*) number of likes up to the last record's date for a specific video and country
+- `dislikes` (*quantitative discrete variable*) number of dislikes up to the last record's date for a specific video and country
+- `comments_count` (*quantitative discrete variable*) number of comments up to the last record's date for a specific video and country.
+- `comments_disabled` (*qualitative binary variable*) whether the comments are enabled or not, represented as `0` if it is false and `1` if it is true.
+- `country_id` (*qualitative nominal variable*) unique identifier for the country where the video is hosted. It consists a string of characters of length 2. The mapping between countries and ids is the following one: United States of America (`US`), Canada (`CA`), Mexico (`MX`), Japan (`JP`), South Korea (`KR`), India (`IN`), Russia (`RU`), United Kingdom (`GB`), France (`FR`) and Germany (`DE`).
+
+As it is indicated in the guide project, we are going to reduce the number of factors for the categorical variables we have: `category_id` and `country_id`. For the first variable, we are going to merge those factors that are intimately related to, having:
+
+- `Film`, that includes: Film & Animation (`1`), Comedy (`23`), Entertainment (`24`), Movies (`30`), Shows (`43`) and Trailers (`44`).
+- `Music`, that is just Music (`10`).
+- `Education`, that is formed by News & Politics (`25`), Howto & Style (`26`), Education (`27`), Science & Technology (`28`) and Nonprofits & Activism (`29`).
+- `Leisure`, that includes: Autos & Vehicles (`2`), Pets & Animals (`15`), Sports (`17`), Travel & Events (`19`), Gaming (`20`) and People & Blogs (`22`).
+
+The number of factors of the variable `country_id` can be reduced using the continent associated instead of the country, therefore this variable will be renamed to `continent_id`. Then, we will have three different ids:
+
+- `America`, that contains United States of America (`US`), Canada (`CA`) and Mexico (`MX`).
+- `Europe`, that includes Russia (`RU`), United Kingdom (`GB`), France (`FR`) and Germany (`DE`).
+- `Asia`, that contains Japan (`JP`), South Korea (`KR`) and India (`IN`).
+
+Notice that for this last case, we should add the value of the quantifiers for the same video and different countries in the same continent.
+
+```{r results='hide'}
+# new category ids
+
+film_categories <- c(1, 23, 24, 30, 43, 44)
+education_categories <- c(25, 26, 27, 28, 29)
+leisure_categories <- c(2, 15, 17, 19, 29, 22)
+
+new_category_ids <-
+  ifelse(data$category_id %in% film_categories, "Film", 
+         ifelse(data$category_id %in% education_categories, "Education", 
+                ifelse(data$category_id %in% leisure_categories, "Leisure", "Music")))
+
+final_data <- data %>% mutate(
+  category_id = factor(new_category_ids)
+)
+
+# new continent_id
+
+america_categories <- c("US", "CA", "MX")
+europe_categories <- c("RU", "GB", "FR", "DE")
+
+new_continent_ids <-
+  ifelse(data$country_id %in% america_categories, "America", 
+         ifelse(data$country_id %in% europe_categories, "Europe", "Asia"))
+
+final_data <- final_data %>% 
+  rename(continent_id = country_id) %>%  
+  mutate(
+    continent_id = factor(new_continent_ids)
+  )
+
+final_data <- final_data %>% 
+  group_by(video_id, continent_id, category_id) %>% 
+  summarize(comments_disabled=comments_disabled[1], 
+            across(where(is.numeric), sum), .groups="keep") %>% 
+  data.frame
+
+```
+
+After the previous transformation, we have a dataset with 195,582 observations.
+
 
