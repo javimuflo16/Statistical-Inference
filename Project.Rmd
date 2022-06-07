@@ -16,6 +16,7 @@ library(dplyr)
 library(stringr)
 library(moments)
 library(kableExtra)
+library(GGally)
 load("dataset.RData")
 ```
 
@@ -72,9 +73,8 @@ data <- youtube %>%
   slice(which.max(trending_date)) %>% 
   select(-c(trending_date, tags)) %>% 
   data.frame
-data$comments_disabled = ifelse(is.na(data$comments_disabled), 
-                                ifelse(data$comment_count==0, 1, 0), 
-                                data$comments_disabled)
+data$comments_disabled[is.na(data$comments_disabled)] <- 
+  ifelse(data[is.na(data$comments_disabled),]$comment_count==0, 1, 0)
 data$views = data$views/1000
 ```
 
@@ -172,13 +172,13 @@ rownames(stats_data)[4] <- "comment"
 
 skewness <- round(c(skewness(final_data$views), skewness(final_data$likes), 
               skewness(final_data$dislikes), 
-              skewness(final_data$comments_disabled)), digits=2)
+              skewness(final_data$comment_count)), digits=2)
 kurtosis <- round(c(kurtosis(final_data$views), kurtosis(final_data$likes), 
               kurtosis(final_data$dislikes), 
-              kurtosis(final_data$comments_disabled)), digits=2)
+              kurtosis(final_data$comment_count)), digits=2)
 sd <- round(c(sd(final_data$views), sd(final_data$likes), 
               sd(final_data$dislikes), 
-              sd(final_data$comments_disabled)), digits=2)
+              sd(final_data$comment_count)), digits=2)
 stats_data <- cbind(stats_data, sd, skewness, kurtosis)
 
 knitr::kable(stats_data, digits = 2, caption = "Stats Table") %>% 
@@ -190,25 +190,70 @@ Once we have analyzed the table above, we can conclude that all of the YouTube v
 
 Taking a look to the measures of centrality we obtain an idea of how it is the variability, for example, the variability is much larger for the variable `likes` than the variable `views` since the difference between the mean with respect the minimum value and the maximum value of the variable `views` is considerably smaller than the same calculation for the variable `likes`. In order to verify this assumption we just need to check the value of the standard deviation (a measure of variability), for the case we have just commented the value for the variable `views` is 4617.47 in contrast with the value of the variable `likes` that is 149734.44, which is considerably much larger.
 
-The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes` and `dislikes`- with a value greater than 3 the distribution is *leptokurtic* (heavier tails than a Normal distribution) and for the variable `comments_count` since the kurtosis is smaller than 3 the distribution is *platykurtic* (thinner tails than a Normal distribution). Let's check all of this visually thanks to the following plot.
+The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes`, `dislikes` and `comments_count`- with a value greater than 3, the distribution is *leptokurtic* (heavier tails than a Normal distribution). Let's check all of this visually thanks to the following plot.
 
 ```{r echo=FALSE}
 par(mfrow=c(2,2))
 hist(final_data$views[final_data$views >= 0 & final_data$views < 750], 
-     breaks=seq(0, 750, by=25), main="", xlab="Num. views")
+     breaks=seq(0, 750, by=5), main="", xlab="Num. views")
 title("Views", line=-1.5)
 hist(final_data$likes[final_data$likes >= 0 & final_data$likes < 8000],
-     breaks=seq(0, 8000, by=80), main="", xlab="Num. likes")
+     breaks=seq(0, 8000, by=40), main="", xlab="Num. likes")
 title("Likes", line=-1.5)
 hist(final_data$dislikes[final_data$dislikes >= 0 & final_data$dislikes < 750],
-     breaks=seq(0, 750, by=25), main="", xlab="Num. dislikes")
+     breaks=seq(0, 750, by=5), main="", xlab="Num. dislikes")
 title("Dislikes", line=-1.5)
 hist(final_data$comment_count[final_data$comment_count >= 0 & 
                                 final_data$comment_count < 750],
-     breaks=seq(0, 750, by=25), main="", xlab="Num. comments")
+     breaks=seq(0, 750, by=5), main="", xlab="Num. comments")
 title("Comments", line=-1.5)
 ```
 
-In the plot above, we can see clearly the difference that was pointed by the kurtosis value, the differences between the three *leptokurtic* distribution with respect the *platykurtic* distribution associated with the variable `comments_count`.
+In the plot above, we can see clearly the characteristic that was pointed by the kurtosis value, distributions are *leptokurtic*, having heavier tails. It is noticeable as well the fact that there is not any variable that follows a Normal distribution. We will see more about this in the following point.
 
+After describing some distribution details of each of the variables, now it is time to see if they are related to each other. In the following pairs chart we can see the relationship between each quantitative variable with others.
 
+```{r cache=TRUE, echo=FALSE, eval=FALSE}
+ggpairs(final_data, columns = 5:8, 
+        mapping = ggplot2::aes(colour=final_data$category_id), 
+        upper = list(continuous = wrap("cor", size = 1.5)),
+        lower = list(continuous = wrap("points", size=0.5), 
+                     combo = wrap("dot", size=0.5))) + 
+    theme(axis.line=element_blank(),
+          axis.text=element_blank(),
+          axis.ticks=element_blank())
+
+ggsave(file="corr.png", dpi=400)
+```
+
+```{r echo=FALSE, out.width = '50%', out.height='50%'}
+knitr::include_graphics("corr.png")
+```
+
+All variables are positive correlated, having that `views` and `likes` are highly correlated (0.811) since the higher of views the more likely that video is liked by the viewers. This logic works also for the number of comments and the number of likes, that's the reason the correlation is high as well (0.846). Moreover, we have shown the correlation split by the different category ids and it is clear that this correlation value depends directly on the category of the video.
+
+Once we have analyzed the quantitative variables, we can move forward and describe a little bit the qualitative variables. For doing this, we are using the frequency tables showed below.
+
+```{r echo=FALSE}
+cat_table <- data.frame(table(final_data$category_id))
+colnames(cat_table)[1] <- "category_id"
+cont_table <- data.frame(table(final_data$continent_id))
+colnames(cont_table)[1] <- "continent_id"
+comm_table <- data.frame(table(final_data$comments_disabled))
+colnames(comm_table)[1] <- "comments_disabled"
+knitr::kable(list(cat_table, cont_table, comm_table)) %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+The three categorical variables are unbalanced, then there are not the same number of observations for each factor. As we could expect, there are more videos with the comments enabled. It is curious that there are more videos in Europe or America than in Asia, the reason might make sense since YouTube (belonging to Google) is a western company. In case of the number of videos by category, the one that has more videos is the `Film` category, followed by `Leisure`, `Education` and lastly `Music`. 
+
+# Model selection
+
+## Selecting a continous random variable
+
+## Estimate the model parameters
+
+### Method of moments
+
+### Maximum likelihood
