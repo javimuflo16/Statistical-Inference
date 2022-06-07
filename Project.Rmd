@@ -34,7 +34,7 @@ Data comes from [Kaggle](https://www.kaggle.com/datasets/datasnaek/youtube-new) 
 The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped, aggregating the dates for each group:
 
 
-```{r results='hide', echo=FALSE}
+```{r echo=FALSE}
 diff_dates <- youtube %>% 
   group_by(country_id, video_id) %>% 
   mutate(trending_dates = paste0(trending_date, collapse = "|")) %>% 
@@ -86,7 +86,7 @@ Observing some blogs about the YouTube's figures for 2018, we can say that the t
 
 The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. Let's obtain the number of observations we have for each country.
 
-```{r results='hide', echo=FALSE}
+```{r echo=FALSE}
 count <- data %>% 
   group_by(country_id) %>% 
   summarise(n = n())
