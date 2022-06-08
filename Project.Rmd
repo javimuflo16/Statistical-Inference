@@ -7,6 +7,7 @@ author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
 date: "17-05-2022"
 output: 
   pdf_document:
+    extra_dependencies: ["systeme"]
     number_sections: true
 ---
 
@@ -287,9 +288,86 @@ The three categorical variables are unbalanced, then there are not the same numb
 
 ## Selecting a continous random variable
 
+In this section we have selected the variable `views` with the purpose of estimating its parameters. The reason to choose this variable is based on the importance of knowing how are distributed the visualization of the top 200 YouTube videos. As we could see in the histograms visualized in Figure \ref{fig:hist} and commented before, the distribution of this variable is right-skewed so it is far from being distributed with a Normal. To achieve normality, or at least being closer, we could apply the log transformation to our variable. Notice that in this case, since the values are greater than zero, no offset is needed.
+
+```{r transf-norm, fig.width=8, fig.height=4, echo=FALSE, fig.pos='H', fig.cap="Log transformation of views variable", cache=TRUE}
+# 2.
+
+# Create variable log_views
+
+final_data <- final_data %>% mutate(
+  log_views = log(views)
+)
+
+# Plot the histogram and the QQ-plot
+
+par(mfrow = c(1,2))
+hist(final_data$log_views, probability = TRUE, main="Histogram log_views", 
+     xlab = "log(views)")
+lines(density(final_data$log_views), col = 4, lwd = 2)
+curve(dnorm(x, mean=mean(final_data$log_views), sd=sd(final_data$log_views)), 
+      add=TRUE, col="red")
+legend('topright', legend=c('non-parametric density', 'normal density'), 
+       col = c('blue', 'red'), pch = 0, cex = 0.5)
+qqnorm(final_data$log_views, pch = 1, frame = FALSE)
+qqline(final_data$log_views, col = 2, lwd = 2)
+```
+
+In the Figure \ref{fig:transf-norm} it is possible to see two different plots that checks whether normality is achieved or not. The plot on the left shows in total three components: two non-parametric components (the histogram of the distribution after applying the transformation and the blue line showing the density distribution of our data) and the third one that is a red line which shows the theoretical Normal density taking into account a estimation of the parameters of our data (sample mean and sample standard deviation). As we can see, the blue line fits almost perfectly the red line, except for the tails where lines are slightly different. This difference is also noticeable in the Q-Q plot, a chart that compares the sample quantiles with the theoretical Normal ones, showing that in the extremes of the sample the distribution is slightly different than a Gaussian but in general the distribution is adjusted perfectly. In conclusion, the `log_views` variable adapts smoothly to a Normal distribution therefore the untransformed variable `views` contains data that can be assumed to follow a log-normal distribution. Then, we have that:
+
+$$
+X_{views} \sim \mathrm{Lognormal}(\mu, \sigma^2)
+$$
+where $\mu$ and $\sigma^2$ are the parameters of interest. Having its probability density function as it follows:
+
+$$
+f(x; \mu, \sigma^2) = \frac{1}{x\sigma\sqrt{2\pi}}\exp\left(-\frac{(\log(x)-\mu)^2}{2\sigma^2}\right)
+$$
+
+In the following points we will estimate the parameters of interest of the distribution we have assumed for our variable `views`.
+
 ## Estimate the model parameters
 
+In this point we will estimate the parameters of interest of $X_{views} \sim \mathrm{Lognormal}(\boldsymbol\theta)$, where $\boldsymbol\theta = (\theta_1, \theta_2)'$, $\theta_1=\mu$ and $\theta_2=\sigma^2$, using two different approaches: method of moments and maximum likelihood estimation.
+
 ### Method of moments
+
+First, let's define the population moments as: $\alpha_r = \alpha_r(\theta_1, \theta_2) \triangleq \mathbb{E}[X^r]$ and the sample moments as $\mathrm{a}_r \triangleq \frac{1}{n}\sum_{i=1}^n X_i^r$. Then, the moments estimators of $\theta_1$ and $\theta_2$ are the solutions of the 2 equations obtained by equating 2 population moments to the corresponding sample moments: $\alpha_{r_{2}}(\theta_1, \theta_2) = \mathrm{a}_{r_{2}}$. 
+
+Recall that the log-normal distribution has $\mathbb{E}[X]=e^{\mu+\sigma^2/2}$ and the normal distribution for the log transformation has $\mu=\mathbb{E}[\log{X}]$, then we can formulate the parts of our system of equations. In the population we have that $\alpha_{1_\mathcal{N}} = \mu = \mathbb{E}[\log{X}]$ and $\alpha_{1_{\mathcal{LN}}} =\exp\{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2\} = \mathbb{E}[X]$ and in the sample side we have that $\mathrm{a}_{1_\mathcal{N}} = \frac{1}{n}\sum_{i=1}^n\log{x_i} = \overline{\log{x}}$ and $\mathrm{a}_{1_\mathcal{LN}}=\frac{1}{n}\sum_{i=1}^nx_i=\bar{x}$, then equating $\alpha_{1_\mathcal{N}}=\mathrm{a}_{1_\mathcal{N}}$ and $\alpha_{1_{\mathcal{LN}}} = \mathrm{a}_{1_\mathcal{LN}}$ we get to our system of equations:
+
+$$
+    \begin{cases}
+      \hat\mu_{mm} = \overline{\log{x}}\\
+      e^{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2} = \bar{x}
+    \end{cases}\,
+$$
+Resolving analytically the second equations we have that:
+
+\begin{align*}
+e^{\hat\mu_{mm}}e^{\hat{\sigma}_{mm}^2/2}
+      & = e^{\frac{1}{n}\sum_{i=1}^n\log{x_i}}e^{\hat{\sigma}_{mm}^2/2} \\ 
+      & = e^{\sum_{i=1}^n\log x^{1/n}}e^{\hat{\sigma}_{mm}^2/2} \\ 
+      & = e^{\log x_1^{1/n}}\dots e^{\log x_n^{1/n}} e^{\hat{\sigma}_{mm}^2/2} \\ 
+      & = x_1^{1/n}\dots x_n^{1/n}e^{\hat{\sigma}_{mm}^2/2} \\ 
+      & = \prod_{i=1}^n x_i^{1/n}e^{\hat{\sigma}_{mm}^2/2} \\ 
+      & = \mathrm{geo}(x)e^{\hat{\sigma}_{mm}^2/2}
+\end{align*}
+
+Then, $\mathrm{geo}(x)e^{\hat{\sigma}_{mm}^2/2} = \bar{x} \rightarrow \sigma^2_{mm} = 2\log\left(\frac{\bar{x}}{\mathrm{geo}(x)}\right)$
+
+```{r}
+geo <- function(x) {
+ return(exp(mean(log(x))))
+}
+
+mu_mm <- mean(final_data$log_views)
+sigma_mm <- 2*log(mean(final_data$views)/geo(final_data$views))
+print(mu_mm)
+print(sigma_mm)
+
+curve(dlnorm(x, mu_mm, sqrt(sigma_mm)), from=0, to=500, col=4, ylab="frequency", xlab="views")
+```
 
 ### Maximum likelihood
 
