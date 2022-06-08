@@ -32,19 +32,24 @@ The aim of this project is to analyze what are the most favorite YouTube videos 
 
 Data comes from [Kaggle](https://www.kaggle.com/datasets/datasnaek/youtube-new) separate by countries and we has merged all of them into a single csv file. As it is commented in the previous website, the information was obtained through the [YouTube API](https://developers.google.com/youtube/v3). 
 
-The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped, aggregating the dates for each group:
+The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped in the Table \ref{tab:show_original_data}, aggregated the dates for each group (`vide_id` and `category_id`).
 
 
-```{r echo=FALSE, cache=TRUE}
+```{r show_original_data, echo = FALSE, cache=TRUE}
+# 1.
+
+## Show original data: dates per video_id and country_id
+
 diff_dates <- youtube %>% 
   group_by(country_id, video_id) %>% 
   mutate(trending_dates = paste0(trending_date, collapse = "|")) %>% 
   distinct(trending_dates) %>% 
   data.frame
 
-knitr::kable(head(diff_dates)) %>% 
+knitr::kable(head(diff_dates), caption = "Original data example") %>% 
   row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 Then it is clear that the record dates depend on the `video_id` and the `country_id`. For example, in the original data the interval times for Canada, US, Germany, FR, UK, India, South Korea, Mexico and Russia are from 14-11-2017 to 14-06-2018 and for Japan from 07-02-2018 to 14-06-2018.
@@ -58,9 +63,14 @@ Besides that, we are applying a couple of tweaks to have our data ready for the 
 - `country_id` from integer to factor class
 - `comments_disables` from character to factor class
 
-Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
+Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`. 
 
-```{r cache=TRUE}
+After all of these changes our modified dataset contains 207,148 rows.
+
+```{r initial_changes, cache=TRUE, include = FALSE}
+
+# Applying changes to the original data. Change type of variables (date, factor)
+
 data <- youtube %>% 
   mutate(
     trending_date = as.Date(trending_date, '%y.%d.%m'),
@@ -73,27 +83,32 @@ data <- youtube %>%
   slice(which.max(trending_date)) %>% 
   select(-c(trending_date, tags)) %>% 
   data.frame
+
 data$comments_disabled[is.na(data$comments_disabled)] <- 
   ifelse(data[is.na(data$comments_disabled),]$comment_count==0, 1, 0)
 data$views = data$views/1000
+
 ```
 
-Our final dataset contains 207,148 rows.
 
 ## Description of the population
 
 Observing some blogs about the YouTube's figures for 2018, we can say that the total number of YouTube videos approximately was around 8 billion videos. A significantly large population size comparing with the sample size of our data that is just 207,148 observations, then the population size is totally different from the sample size.
 
-The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. Let's obtain the number of observations we have for each country.
+The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. We have obtained the number of observations we have for each country and visualized them in the Table \ref{tab:videos_per_country}.
 
-```{r echo=FALSE, cache=TRUE}
+```{r videos_per_country, echo = FALSE, cache=TRUE}
+
+# Visualize the number of videos per country
+
 count <- data %>% 
   group_by(country_id) %>% 
   summarise(n = n())
 
-knitr::kable(count) %>% 
+knitr::kable(count, caption = "Number of videos per country") %>% 
   row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 We could see in the table above that UK and US have a smaller number of observations, nevertheless it does not mean that they have less videos, it could be that they have a large number of videos repeated (consecutive days appeared in the 200 trendiest videos).
@@ -128,7 +143,12 @@ The number of factors of the variable `country_id` can be reduced using the cont
 
 Notice that for this last case, we should add the value of the quantifiers for the same video and different countries in the same continent.
 
-```{r results='hide', cache=TRUE}
+After the previous transformation, we have a dataset with 195,582 observations.
+
+```{r modify_categorical, results='hide', cache=TRUE, include = FALSE}
+
+# Simplifying categorical variables: category_id and country_id
+
 film_categories <- c(1, 23, 24, 30, 43, 44)
 education_categories <- c(25, 26, 27, 28, 29)
 leisure_categories <- c(2, 15, 17, 19, 29, 22)
@@ -141,6 +161,7 @@ new_category_ids <-
 new_continent_ids <-
   ifelse(data$country_id %in% c("US", "CA", "MX"), "America", 
          ifelse(data$country_id %in% c("RU", "GB", "FR", "DE"), "Europe", "Asia"))
+
 final_data <- data %>% 
   rename(continent_id = country_id) %>%  
   mutate(
@@ -151,13 +172,16 @@ final_data <- data %>%
   summarize(comments_disabled=comments_disabled[1], 
             across(where(is.numeric), sum), .groups="keep") %>% 
   data.frame
+
 ```
 
-After the previous transformation, we have a dataset with 195,582 observations.
 
 In the table \ref{tab:table_stats} we have summarized some important statistics related to the measures of centrality, variability and shape for the quantitative variables within the dataset.
 
-```{r table_stats, echo=FALSE}
+```{r table_stats, echo = FALSE, echo = FALSE}
+
+# Statistics table for the quantitative variables
+
 stats_quant <- t(summary(final_data[,5:8]))
 stats_data  <- t(sapply(((5:8)-4), function(i) {
   sapply(1:6, function(j) {
@@ -184,15 +208,17 @@ stats_data <- cbind(stats_data, sd, skewness, kurtosis)
 knitr::kable(stats_data, digits = 2, caption = "Stats Table") %>% 
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 Once we have analyzed the table above, we can conclude that all of the YouTube videos within the dataset at least contain 200 views, not occurring the same for the other three variables where data can have 0 likes, 0 dislikes or 0 comments. 
 
 Taking a look to the measures of centrality we obtain an idea of how it is the variability, for example, the variability is much larger for the variable `likes` than the variable `views` since the difference between the mean with respect the minimum value and the maximum value of the variable `views` is considerably smaller than the same calculation for the variable `likes`. In order to verify this assumption we just need to check the value of the standard deviation (a measure of variability), for the case we have just commented the value for the variable `views` is 4617.47 in contrast with the value of the variable `likes` that is 149734.44, which is considerably much larger.
 
-The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes`, `dislikes` and `comments_count`- with a value greater than 3, the distribution is *leptokurtic* (heavier tails than a Normal distribution). Let's check all of this visually thanks to the following plot.
+The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes`, `dislikes` and `comments_count`- with a value greater than 3, the distribution is *leptokurtic* (heavier tails than a Normal distribution). Let's check all of this visually thanks to the plots in Figure \ref{fig:hist}.
 
-```{r echo=FALSE}
+```{r hist, echo=FALSE, fig.cap = "Histograms", fig.pos = 'H', echo = FALSE}
+# Histograms for the quantitative variables, selecting different breaks parameter
 par(mfrow=c(2,2))
 hist(final_data$views[final_data$views >= 0 & final_data$views < 750], 
      breaks=seq(0, 750, by=5), main="", xlab="Num. views")
@@ -211,9 +237,12 @@ title("Comments", line=-1.5)
 
 In the plot above, we can see clearly the characteristic that was pointed by the kurtosis value, distributions are *leptokurtic*, having heavier tails. It is noticeable as well the fact that there is not any variable that follows a Normal distribution. We will see more about this in the following point.
 
-After describing some distribution details of each of the variables, now it is time to see if they are related to each other. In the following pairs chart we can see the relationship between each quantitative variable with others.
+After describing some distribution details of each of the variables, now it is time to see if they are related to each other. In the following pairs chart, represented in the Figure \ref{fig:corr}, we can see the relationship between each quantitative variable with others.
 
-```{r cache=TRUE, echo=FALSE, eval=FALSE}
+```{r ggpairs, cache=TRUE, eval=FALSE, include = FALSE}
+
+# Generating pairs plot with correlation values and save the image
+
 ggpairs(final_data, columns = 5:8, 
         mapping = ggplot2::aes(colour=final_data$category_id), 
         upper = list(continuous = wrap("cor", size = 1.5)),
@@ -224,29 +253,35 @@ ggpairs(final_data, columns = 5:8,
           axis.ticks=element_blank())
 
 ggsave(file="corr.png", dpi=400)
+
 ```
 
-```{r echo=FALSE, out.width = '50%', out.height='50%'}
+```{r corr, echo=FALSE, out.width = '45%', out.height='45%', fig.cap = "Correlation information", fig.pos = 'H'}
 knitr::include_graphics("corr.png")
 ```
 
 All variables are positive correlated, having that `views` and `likes` are highly correlated (0.811) since the higher of views the more likely that video is liked by the viewers. This logic works also for the number of comments and the number of likes, that's the reason the correlation is high as well (0.846). Moreover, we have shown the correlation split by the different category ids and it is clear that this correlation value depends directly on the category of the video.
 
-Once we have analyzed the quantitative variables, we can move forward and describe a little bit the qualitative variables. For doing this, we are using the frequency tables showed below.
+Once we have analyzed the quantitative variables, we can move forward and describe a little bit the qualitative variables. For doing this, we are using the frequency tables showed in Table \ref{tab:freq_table}.
 
-```{r echo=FALSE}
+```{r freq_table, echo = FALSE}
+
+# Frequency tables for the qualitative variables
+
 cat_table <- data.frame(table(final_data$category_id))
 colnames(cat_table)[1] <- "category_id"
 cont_table <- data.frame(table(final_data$continent_id))
 colnames(cont_table)[1] <- "continent_id"
 comm_table <- data.frame(table(final_data$comments_disabled))
 colnames(comm_table)[1] <- "comments_disabled"
-knitr::kable(list(cat_table, cont_table, comm_table)) %>% 
+knitr::kable(list(cat_table, cont_table, comm_table), caption = "Frequency tables") %>% 
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 The three categorical variables are unbalanced, then there are not the same number of observations for each factor. As we could expect, there are more videos with the comments enabled. It is curious that there are more videos in Europe or America than in Asia, the reason might make sense since YouTube (belonging to Google) is a western company. In case of the number of videos by category, the one that has more videos is the `Film` category, followed by `Leisure`, `Education` and lastly `Music`. 
+
 
 # Model selection
 
@@ -257,3 +292,13 @@ The three categorical variables are unbalanced, then there are not the same numb
 ### Method of moments
 
 ### Maximum likelihood
+
+
+\newpage
+# Apendix
+
+## Code
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+
+```
