@@ -571,7 +571,10 @@ knitr::kable(props,
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
-Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=np_i(1-p_i)$
+Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=\frac{1}{n}p_i(1-p_i)$
+
+```{r mse_cat_tot, echo=FALSE}
+```
 
 \newpage
 # Apendix
