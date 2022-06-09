@@ -424,7 +424,7 @@ $$
 \frac{\partial}{\partial{\sigma^2}}-\log(\sqrt{2\pi\sigma^2})^n-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 = -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2
 $$. 
 
-The parameters are calculated by equaling both equations to zero, then we obtain that $\hat\mu_{MLE}=\frac{1}{n}\sum_{i=1}^n\log{x_i}$ and $\hat\sigma^2_{MLE}=\frac{1}{n}\sum_{i=1}^n(\log{x_i}-\hat\mu)^2$.
+The parameters are calculated by equaling both equations to zero, then we obtain that $\hat\mu_{MLE}=\frac{1}{n}\sum_{i=1}^n\log{x_i}$ and $\hat\sigma^2_{MLE}=\frac{1}{n}\sum_{i=1}^n(\log{x_i}-\hat\mu)^2$. In this case, the maximum likelihood estimators are identical to those for a Normal distribution where the observations have applied the the log transformation.
 
 Doing the calculations above with the data from the variable `views` we obtain the estimations described in the Table \ref{tab:mle}.
 
