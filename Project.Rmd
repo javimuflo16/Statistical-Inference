@@ -334,43 +334,133 @@ In this point we will estimate the parameters of interest of $X_{views} \sim \ma
 
 First, let's define the population moments as: $\alpha_r = \alpha_r(\theta_1, \theta_2) \triangleq \mathbb{E}[X^r]$ and the sample moments as $\mathrm{a}_r \triangleq \frac{1}{n}\sum_{i=1}^n X_i^r$. Then, the moments estimators of $\theta_1$ and $\theta_2$ are the solutions of the 2 equations obtained by equating 2 population moments to the corresponding sample moments: $\alpha_{r_{2}}(\theta_1, \theta_2) = \mathrm{a}_{r_{2}}$. 
 
-Recall that the log-normal distribution has $\mathbb{E}[X]=e^{\mu+\sigma^2/2}$ and the normal distribution for the log transformation has $\mu=\mathbb{E}[\log{X}]$, then we can formulate the parts of our system of equations. In the population we have that $\alpha_{1_\mathcal{N}} = \mu = \mathbb{E}[\log{X}]$ and $\alpha_{1_{\mathcal{LN}}} =\exp\{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2\} = \mathbb{E}[X]$ and in the sample side we have that $\mathrm{a}_{1_\mathcal{N}} = \frac{1}{n}\sum_{i=1}^n\log{x_i} = \overline{\log{x}}$ and $\mathrm{a}_{1_\mathcal{LN}}=\frac{1}{n}\sum_{i=1}^nx_i=\bar{x}$, then equating $\alpha_{1_\mathcal{N}}=\mathrm{a}_{1_\mathcal{N}}$ and $\alpha_{1_{\mathcal{LN}}} = \mathrm{a}_{1_\mathcal{LN}}$ we get to our system of equations:
+Recall that the log-normal distribution has $\mathbb{E}[X]=e^{\mu+\sigma^2/2}$, then we can formulate the parts of our system of equations. In the population we have that $\alpha_1 =\exp\{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2\} = \exp{\{\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2/2}\} = \mathbb{E}[X]$ and $\alpha_2 = \exp\{2\hat\mu_{mm}+\hat{\sigma}_{mm}^2\} = \exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\} = \mathbb{E}[X^2]$ and in the sample side we have that $\mathrm{a}_1=\frac{1}{n}\sum_{i=1}^nx_i=\bar{x}$ and $\mathrm{a}_2=\frac{1}{n}\sum_{i=1}^nx_i^2$. Then equating $\alpha_1=\mathrm{a}_1$ and $\alpha_2 = \mathrm{a}_2$ we come to our system of equations:
 
 $$
     \begin{cases}
-      \hat\mu_{mm} = \overline{\log{x}}\\
-      e^{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2} = \bar{x}
+      \exp{\{\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2/2}\} = \frac{1}{n}\sum_{i=1}^nx_i\\
+      \exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\} = \frac{1}{n}\sum_{i=1}^nx_i^2
     \end{cases}\,
 $$
-Resolving analytically the second equations we have that:
 
-\begin{align*}
-e^{\hat\mu_{mm}}e^{\hat{\sigma}_{mm}^2/2}
-      & = e^{\frac{1}{n}\sum_{i=1}^n\log{x_i}}e^{\hat{\sigma}_{mm}^2/2} \\ 
-      & = e^{\sum_{i=1}^n\log x^{1/n}}e^{\hat{\sigma}_{mm}^2/2} \\ 
-      & = e^{\log x_1^{1/n}}\dots e^{\log x_n^{1/n}} e^{\hat{\sigma}_{mm}^2/2} \\ 
-      & = x_1^{1/n}\dots x_n^{1/n}e^{\hat{\sigma}_{mm}^2/2} \\ 
-      & = \prod_{i=1}^n x_i^{1/n}e^{\hat{\sigma}_{mm}^2/2} \\ 
-      & = \mathrm{geo}(x)e^{\hat{\sigma}_{mm}^2/2}
-\end{align*}
+Analytically it can be shown that $\exp{\{2\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2}\} = \bar{x}^2$, then squaring both sides of the first equation we have this. Then we divide the second equation by the squared first:
 
-Then, $\mathrm{geo}(x)e^{\hat{\sigma}_{mm}^2/2} = \bar{x} \rightarrow \sigma^2_{mm} = 2\log\left(\frac{\bar{x}}{\mathrm{geo}(x)}\right)$
+$$
+\frac{\exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\}}{\exp{\{2\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2}\}} = \frac{\frac{1}{n}\sum_{i=1}^nx_i^2}{\left(\frac{1}{n}\sum_{i=1}^nx_i\right)^2} \rightarrow \exp{\{\hat{\sigma}_{mm}^2}\} = n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2 \rightarrow \hat{\sigma}_{mm}^2 = \log{\left[n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2\right]}
+$$
 
-```{r}
-geo <- function(x) {
- return(exp(mean(log(x))))
-}
+Plug-in this into the first equation we have that
 
-mu_mm <- mean(final_data$log_views)
-sigma_mm <- 2*log(mean(final_data$views)/geo(final_data$views))
-print(mu_mm)
-print(sigma_mm)
+$$
+\exp{\{\hat\mu_{mm}\}}\exp{\left\{\log{\left[n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2\right]/2}\right\}} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow \exp{\{\hat\mu_{mm}\}}\exp{\left\{\log{\sqrt{n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2}}\right\}} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow
+$$
 
-curve(dlnorm(x, mu_mm, sqrt(sigma_mm)), from=0, to=500, col=4, ylab="frequency", xlab="views")
+$$
+\rightarrow \exp{\{\hat\mu_{mm}\}}\sqrt{n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow \hat\mu_{mm} = \log{\left\{\frac{1}{n^{3/2}}\left(\sum_{i=1}^nx_i^2\right)^{-1/2}\left(\sum_{i=1}^nx_i\right)^{2}\right\}}
+$$
+
+Let's calculate using the formulas above the estimations of the parameters' values. The Table \ref{tab:method_moments} shows the results for $\hat\mu_{mm}$ and $\hat\sigma^2_{mm}$.
+
+```{r method_moments, echo = FALSE, fig.pos='H'}
+
+# Estimation using the method of the moments
+
+mu_mm <- log(1/length(final_data$views)^(3/2)*
+               sum(final_data$views^2)^{-1/2}*sum(final_data$views)^2)
+sigma2_mm <- log(length(final_data$views)*
+                   sum(final_data$views)^-2*sum(final_data$views^2))
+
+mm_est <- cbind(mu_mm, sigma2_mm)
+colnames(mm_est) <- c('mu', 'sigma^2')
+rownames(mm_est) <- c('Method of moments')
+
+knitr::kable(mm_est, caption="Method of moments estimators") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
-### Maximum likelihood
+In the Figure \ref{fig:est_moments} we can see the difference between the kernel density estimator of our data and the density of the log-normal distribution with the parameters we have just calculated. Notice that this difference is tiny, almost imperceptible.
 
+```{r est_moments, echo=FALSE, fig.pos='H', fig.width=5, fig.height=3, fig.cap="Method of moments, kde"}
+# Plot the non parametric kde of views and the density of the log-normal with the parameters
+
+kde <- density(log(final_data$views))
+kde_transf <- kde
+kde_transf$x <- exp(kde_transf$x)
+kde_transf$y <- kde_transf$y * 1 / kde_transf$x
+plot(kde_transf, main="", xlim = c(0, 500), xlab="")
+curve(dlnorm(x, mu_mm, sqrt(sigma2_mm)), from=0, to=500, col=4, 
+      ylab="frequency", xlab="views", add=TRUE)
+legend('topright', legend=c('non-parametric density', 'method of moments estimation'), 
+       col = c('black', 'blue'), pch = 0, cex = 0.5)
+
+```
+
+
+### Maximum likelihood estimation
+
+Now we will estimate the parameters using the maximum likelihood estimation. As we mentioned before, assuming that $X \sim \mathcal{LN}(\mu, \sigma^2)$ and let $X_1, \dots , X_n$ be a simple random sample that each of them is independent and identically distributed, then
+
+$$
+\mathrm{L}(\mu, \sigma^2; x_1, \dots, x_n) = f(x_1, \dots , x_n; \mu, \sigma^2) = \prod_{i=1}^nf(x_i;\mu,\sigma^2)= \frac{1}{(\sigma\sqrt{2\pi})^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)
+$$
+
+Since the log-likelihood is more manageable and less cumbersome, we are going to apply logarithms to the formula above:
+
+\begin{align*}
+\ell(\mu, \sigma^2; x_1, \dots , x_n) 
+& = \log\left[\frac{1}{(\sigma\sqrt{2\pi})^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)\right] \\ 
+& = - \log(\sigma\sqrt{2\pi})^n-\sum_{i=1}^n \log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2
+\end{align*}
+
+Then we have to look for values of $\hat\mu$ and $\hat\sigma^2$ that maximizes the log-likelihood. Then, we must find the partial derivative with respect both parameters, with respect $\mu$ we have that  
+$$
+\frac{\partial}{\partial{\mu}}\frac{-1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 =  \frac{-1}{2\sigma^2}\sum_{i=1}^n\frac{\partial}{\partial{\mu}}(\log{x_i}-\mu)^2 = \frac{-1}{2\sigma^2}\sum_{i=1}^n-2(\log{x_i}-\mu) = \frac{1}{\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)
+$$
+
+and with respect $\sigma^2$ we have that
+
+$$
+\frac{\partial}{\partial{\sigma^2}}-\log(\sqrt{2\pi\sigma^2})^n-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 = -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2
+$$. 
+
+The parameters are calculated by equaling both equations to zero, then we obtain that $\hat\mu_{MLE}=\frac{1}{n}\sum_{i=1}^n\log{x_i}$ and $\hat\sigma^2_{MLE}=\frac{1}{n}\sum_{i=1}^n(\log{x_i}-\hat\mu)^2$.
+
+Doing the calculations above with the data from the variable `views` we obtain the estimations described in the Table \ref{tab:mle}.
+
+```{r mle, echo = FALSE, fig.pos='H'}
+
+# Estimate the parameters using MLE
+
+mu_mle <- mean(log(final_data$views))
+sigma2_mle <- var(log(final_data$views))
+
+mle_est <- cbind(mu_mle, sigma2_mle)
+colnames(mle_est) <- c('mu', 'sigma^2')
+rownames(mle_est) <- c('Maximum likelihood estimation')
+
+knitr::kable(mle_est, caption="Maximum likelihood estimation") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+
+```
+
+In the Figure \ref{fig:mle_plot} we can see the difference between the kernel density estimator of our data and the density of the log-normal distribution with the parameters we have just calculated. As you can see comparing the green line with the black one, the distribution defined using the parameters calculated through MLE is not so accurate with respect the non-parametric estimation. In this case, the estimation is not as good as it was using the method of moments.
+
+```{r mle_plot, echo=FALSE, fig.pos='H', fig.width=5, fig.height=3, fig.cap="Maximum likelihood estimation, kde"}
+# Plot the non parametric kde of views and the density of the log-normal with the parameters
+
+kde <- density(log(final_data$views))
+kde_transf <- kde
+kde_transf$x <- exp(kde_transf$x)
+kde_transf$y <- kde_transf$y * 1 / kde_transf$x
+plot(kde_transf, main="", xlim = c(0, 500), xlab="")
+curve(dlnorm(x, mu_mle, sqrt(sigma2_mle)), from=0, to=500, col=3, 
+      ylab="frequency", xlab="views", add=TRUE)
+legend('topright', legend=c('non-parametric density', 'maximum likelihood estimation'), 
+       col = c('black', 'green4'), pch = 0, cex = 0.5)
+
+```
 
 \newpage
 # Apendix
