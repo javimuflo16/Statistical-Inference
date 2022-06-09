@@ -402,29 +402,44 @@ legend('topright', legend=c('non-parametric density', 'method of moments estimat
 Now we will estimate the parameters using the maximum likelihood estimation. As we mentioned before, assuming that $X \sim \mathcal{LN}(\mu, \sigma^2)$ and let $X_1, \dots , X_n$ be a simple random sample that each of them is independent and identically distributed, then
 
 $$
-\mathrm{L}(\mu, \sigma^2; x_1, \dots, x_n) = f(x_1, \dots , x_n; \mu, \sigma^2) = \prod_{i=1}^nf(x_i;\mu,\sigma^2)= \frac{1}{(\sigma\sqrt{2\pi})^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)
+\mathrm{L}(\mu, \sigma^2; x_1, \dots, x_n) = f(x_1, \dots , x_n; \mu, \sigma^2) = \prod_{i=1}^nf(x_i;\mu,\sigma^2)= \frac{1}{\left(\sqrt{2\pi\sigma^2}\right)^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)
 $$
 
 Since the log-likelihood is more manageable and less cumbersome, we are going to apply logarithms to the formula above:
 
 \begin{align*}
 \ell(\mu, \sigma^2; x_1, \dots , x_n) 
-& = \log\left[\frac{1}{(\sigma\sqrt{2\pi})^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)\right] \\ 
-& = - \log(\sigma\sqrt{2\pi})^n-\sum_{i=1}^n \log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2
+& = \log{\left[\frac{1}{\left(\sqrt{2\pi\sigma^2}\right)^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)\right]} \\ 
+& = -\log\left(\sqrt{2\pi\sigma^2}\right)^n-\sum_{i=1}^n \log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\
+& = -\frac{n}{2}\log(2\pi\sigma^2)-\sum_{i=1}^n\log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n((\log{x_i})^2-2\mu\log{x_i}+\mu^2) \\
+& = -\frac{n}{2}\log(2\pi\sigma^2)-\sum_{i=1}^n\log(x_i)-\frac{\sum_{i=1}^n(\log{x_i})^2}{2\sigma^2}+\frac{\sum_{i=1}^n\mu\log{x_i}}{\sigma^2}-\frac{n\mu^2}{2\sigma^2}
 \end{align*}
 
+
+
 Then we have to look for values of $\hat\mu$ and $\hat\sigma^2$ that maximizes the log-likelihood. Then, we must find the partial derivative with respect both parameters, with respect $\mu$ we have that  
-$$
-\frac{\partial}{\partial{\mu}}\frac{-1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 =  \frac{-1}{2\sigma^2}\sum_{i=1}^n\frac{\partial}{\partial{\mu}}(\log{x_i}-\mu)^2 = \frac{-1}{2\sigma^2}\sum_{i=1}^n-2(\log{x_i}-\mu) = \frac{1}{\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)
-$$
+
+\begin{align*}
+\frac{\partial}{\partial{\mu}}\ell(\mu, \sigma^2; X) 
+& = \frac{\partial}{\partial{\mu}}\frac{\sum_{i=1}^n\mu\log{x_i}}{\sigma^2}-\frac{n\hat\mu^2}{2\sigma^2} \\ 
+& = \frac{\sum_{i=1}^n\log{x_i}}{\sigma^2}-\frac{n\hat\mu}{\sigma^2} \\ 
+& \rightarrow \frac{\sum_{i=1}^n\log{x_i}}{\sigma^2}-\frac{n\hat\mu}{\sigma^2}=0 \\ 
+& \rightarrow n\hat\mu = \sum_{i=1}^n\log{x_i} \\
+& \rightarrow \hat\mu_{MLE} = \frac{\sum_{i=1}^n\log{x_i}}{n}
+\end{align*}
 
 and with respect $\sigma^2$ we have that
 
-$$
-\frac{\partial}{\partial{\sigma^2}}-\log(\sqrt{2\pi\sigma^2})^n-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 = -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2
-$$. 
+\begin{align*}
+\frac{\partial}{\partial{\sigma^2}}\ell(\mu, \sigma^2; X) & = \frac{\partial}{\partial{\sigma^2}}\left[-\frac{n}{2}\log(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2\right] \\
+ & = -\frac{n}{2\sigma^2}-\frac{1}{2}(\sigma^2)^{-2}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\
+ & = -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\ 
+ & \rightarrow -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 = 0 \\
+ & \rightarrow \frac{n}{2\sigma^2} = \frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\ 
+ & \rightarrow \sigma^2_{MLE} = \frac{\sum_{i=1}^n(\log{x_i}-\mu)^2}{n}
+\end{align*}
 
-The parameters are calculated by equaling both equations to zero, then we obtain that $\hat\mu_{MLE}=\frac{1}{n}\sum_{i=1}^n\log{x_i}$ and $\hat\sigma^2_{MLE}=\frac{1}{n}\sum_{i=1}^n(\log{x_i}-\hat\mu)^2$. In this case, the maximum likelihood estimators are identical to those for a Normal distribution where the observations have applied the the log transformation.
+The parameters were calculated by equaling both partial derivations to zero, then we obtain $\hat\mu_{MLE}$ and $\hat\sigma^2_{MLE}$. In this case, for the log-normal distribution, the maximum likelihood estimators are identical to those for the Normal distribution where its observations were log-transformed.
 
 Doing the calculations above with the data from the variable `views` we obtain the estimations described in the Table \ref{tab:mle}.
 
