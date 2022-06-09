@@ -441,6 +441,15 @@ and with respect $\sigma^2$ we have that
 
 The parameters were calculated by equaling both partial derivations to zero, then we obtain $\hat\mu_{MLE}$ and $\hat\sigma^2_{MLE}$. In this case, for the log-normal distribution, the maximum likelihood estimators are identical to those for the Normal distribution where its observations were log-transformed.
 
+To verify that these estimators maximize the value of the log-likelihood function we must calculate the Hessian of the log-likelihood function and verify that it is negative-definite matrix. We have avoided calculations and we have just defined the resulting Hessian matrix below. It is negative-define, since the matrix is symmetric and all its pivots are negative, indicating a strict local maximum.
+
+$$
+\mathbf{H} = \begin{pmatrix}
+-\frac{n}{\sigma^2} & 0\\
+0 & -\frac{\sum_{i=1}^n(\log{x_i}-\mu)^2}{2(\sigma^2)^3}\\
+\end{pmatrix}
+$$
+
 Doing the calculations above with the data from the variable `views` we obtain the estimations described in the Table \ref{tab:mle}.
 
 ```{r mle, echo = FALSE, fig.pos='H'}
@@ -476,6 +485,13 @@ legend('topright', legend=c('non-parametric density', 'maximum likelihood estima
        col = c('black', 'green4'), pch = 0, cex = 0.5)
 
 ```
+
+
+# Inference with more than one sample
+
+## Estimate the population mean of subgroups
+
+
 
 \newpage
 # Apendix
