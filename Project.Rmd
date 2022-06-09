@@ -7,6 +7,7 @@ author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
 date: "17-05-2022"
 output: 
   pdf_document:
+    extra_dependencies: ["systeme"]
     number_sections: true
 ---
 
@@ -32,19 +33,24 @@ The aim of this project is to analyze what are the most favorite YouTube videos 
 
 Data comes from [Kaggle](https://www.kaggle.com/datasets/datasnaek/youtube-new) separate by countries and we has merged all of them into a single csv file. As it is commented in the previous website, the information was obtained through the [YouTube API](https://developers.google.com/youtube/v3). 
 
-The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped, aggregating the dates for each group:
+The csv file we uploaded at the beginning of the course contains 375,942 rows and 10 variables. It describes the 200 top trending YouTube videos per day for some different countries: United States of America, Canada, Mexico, Japan, South Korea, India, Russia, United Kingdom, France and Germany. Not all countries have the same interval of time. YouTube videos do not have the same period of time between each other either. Let's see the data grouped in the Table \ref{tab:show_original_data}, aggregated the dates for each group (`vide_id` and `category_id`).
 
 
-```{r echo=FALSE, cache=TRUE}
+```{r show_original_data, echo = FALSE, cache=TRUE}
+# 1.
+
+## Show original data: dates per video_id and country_id
+
 diff_dates <- youtube %>% 
   group_by(country_id, video_id) %>% 
   mutate(trending_dates = paste0(trending_date, collapse = "|")) %>% 
   distinct(trending_dates) %>% 
   data.frame
 
-knitr::kable(head(diff_dates)) %>% 
+knitr::kable(head(diff_dates), caption = "Original data example") %>% 
   row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 Then it is clear that the record dates depend on the `video_id` and the `country_id`. For example, in the original data the interval times for Canada, US, Germany, FR, UK, India, South Korea, Mexico and Russia are from 14-11-2017 to 14-06-2018 and for Japan from 07-02-2018 to 14-06-2018.
@@ -58,9 +64,14 @@ Besides that, we are applying a couple of tweaks to have our data ready for the 
 - `country_id` from integer to factor class
 - `comments_disables` from character to factor class
 
-Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`.
+Secondly, in order to have available a continuous variable, we are going to change the value of the variable `views` to be measured in miles. Lastly, we are filling in the missing values for the variable `comments_disables` (setting `0` when there are comments and `1` when the number of comments is zero) and removing the variables that we are not going to use afterwards such as `trending_date` and `tags`. 
 
-```{r cache=TRUE}
+After all of these changes our modified dataset contains 207,148 rows.
+
+```{r initial_changes, cache=TRUE, include = FALSE}
+
+# Applying changes to the original data. Change type of variables (date, factor)
+
 data <- youtube %>% 
   mutate(
     trending_date = as.Date(trending_date, '%y.%d.%m'),
@@ -73,27 +84,32 @@ data <- youtube %>%
   slice(which.max(trending_date)) %>% 
   select(-c(trending_date, tags)) %>% 
   data.frame
+
 data$comments_disabled[is.na(data$comments_disabled)] <- 
   ifelse(data[is.na(data$comments_disabled),]$comment_count==0, 1, 0)
 data$views = data$views/1000
+
 ```
 
-Our final dataset contains 207,148 rows.
 
 ## Description of the population
 
 Observing some blogs about the YouTube's figures for 2018, we can say that the total number of YouTube videos approximately was around 8 billion videos. A significantly large population size comparing with the sample size of our data that is just 207,148 observations, then the population size is totally different from the sample size.
 
-The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. Let's obtain the number of observations we have for each country.
+The total number of videos in YouTube at the time where the last observation was recorded vary based on the country. Considering the number of active users per country we could approximate the total videos for each market, however this value would not be accurate at all. We have obtained the number of observations we have for each country and visualized them in the Table \ref{tab:videos_per_country}.
 
-```{r echo=FALSE, cache=TRUE}
+```{r videos_per_country, echo = FALSE, cache=TRUE}
+
+# Visualize the number of videos per country
+
 count <- data %>% 
   group_by(country_id) %>% 
   summarise(n = n())
 
-knitr::kable(count) %>% 
+knitr::kable(count, caption = "Number of videos per country") %>% 
   row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 We could see in the table above that UK and US have a smaller number of observations, nevertheless it does not mean that they have less videos, it could be that they have a large number of videos repeated (consecutive days appeared in the 200 trendiest videos).
@@ -128,7 +144,12 @@ The number of factors of the variable `country_id` can be reduced using the cont
 
 Notice that for this last case, we should add the value of the quantifiers for the same video and different countries in the same continent.
 
-```{r results='hide', cache=TRUE}
+After the previous transformation, we have a dataset with 195,582 observations.
+
+```{r modify_categorical, results='hide', cache=TRUE, include = FALSE}
+
+# Simplifying categorical variables: category_id and country_id
+
 film_categories <- c(1, 23, 24, 30, 43, 44)
 education_categories <- c(25, 26, 27, 28, 29)
 leisure_categories <- c(2, 15, 17, 19, 29, 22)
@@ -141,6 +162,7 @@ new_category_ids <-
 new_continent_ids <-
   ifelse(data$country_id %in% c("US", "CA", "MX"), "America", 
          ifelse(data$country_id %in% c("RU", "GB", "FR", "DE"), "Europe", "Asia"))
+
 final_data <- data %>% 
   rename(continent_id = country_id) %>%  
   mutate(
@@ -151,13 +173,16 @@ final_data <- data %>%
   summarize(comments_disabled=comments_disabled[1], 
             across(where(is.numeric), sum), .groups="keep") %>% 
   data.frame
+
 ```
 
-After the previous transformation, we have a dataset with 195,582 observations.
 
 In the table \ref{tab:table_stats} we have summarized some important statistics related to the measures of centrality, variability and shape for the quantitative variables within the dataset.
 
-```{r table_stats, echo=FALSE}
+```{r table_stats, echo = FALSE, echo = FALSE}
+
+# Statistics table for the quantitative variables
+
 stats_quant <- t(summary(final_data[,5:8]))
 stats_data  <- t(sapply(((5:8)-4), function(i) {
   sapply(1:6, function(j) {
@@ -184,15 +209,17 @@ stats_data <- cbind(stats_data, sd, skewness, kurtosis)
 knitr::kable(stats_data, digits = 2, caption = "Stats Table") %>% 
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 Once we have analyzed the table above, we can conclude that all of the YouTube videos within the dataset at least contain 200 views, not occurring the same for the other three variables where data can have 0 likes, 0 dislikes or 0 comments. 
 
 Taking a look to the measures of centrality we obtain an idea of how it is the variability, for example, the variability is much larger for the variable `likes` than the variable `views` since the difference between the mean with respect the minimum value and the maximum value of the variable `views` is considerably smaller than the same calculation for the variable `likes`. In order to verify this assumption we just need to check the value of the standard deviation (a measure of variability), for the case we have just commented the value for the variable `views` is 4617.47 in contrast with the value of the variable `likes` that is 149734.44, which is considerably much larger.
 
-The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes`, `dislikes` and `comments_count`- with a value greater than 3, the distribution is *leptokurtic* (heavier tails than a Normal distribution). Let's check all of this visually thanks to the following plot.
+The other other two statistics provide a measure of the shape of the distribution. In particular, the skewness gives an idea of how much shifted the distribution is with respect a Normal distribution. In our case, the table \ref{tab:table_stats} shows that all variables have a positive skewness, meaning that those distributions are right-skewed. It is worthy to say that this insight can be approximately acquired looking at the mean and the 1st and the 3rd quantiles. If the mean is more or less in the middle between the quantiles, then it is more likely to have a skewness close to 0. In our case, the four variables have the mean outside the interval between the 1st and the third quantile. Lastly, it is the kurtosis statistic that measures how heavy are the tails of the distribution. As it is occurred in the skewness, the Normal distribution is taken as the golden standard and the kurtosis is compared with respect this distribution. Therefore, for those variables -`views`, `likes`, `dislikes` and `comments_count`- with a value greater than 3, the distribution is *leptokurtic* (heavier tails than a Normal distribution). Let's check all of this visually thanks to the plots in Figure \ref{fig:hist}.
 
-```{r echo=FALSE}
+```{r hist, echo=FALSE, fig.cap = "Histograms", fig.pos = 'H', echo = FALSE}
+# Histograms for the quantitative variables, selecting different breaks parameter
 par(mfrow=c(2,2))
 hist(final_data$views[final_data$views >= 0 & final_data$views < 750], 
      breaks=seq(0, 750, by=5), main="", xlab="Num. views")
@@ -211,9 +238,12 @@ title("Comments", line=-1.5)
 
 In the plot above, we can see clearly the characteristic that was pointed by the kurtosis value, distributions are *leptokurtic*, having heavier tails. It is noticeable as well the fact that there is not any variable that follows a Normal distribution. We will see more about this in the following point.
 
-After describing some distribution details of each of the variables, now it is time to see if they are related to each other. In the following pairs chart we can see the relationship between each quantitative variable with others.
+After describing some distribution details of each of the variables, now it is time to see if they are related to each other. In the following pairs chart, represented in the Figure \ref{fig:corr}, we can see the relationship between each quantitative variable with others.
 
-```{r cache=TRUE, echo=FALSE, eval=FALSE}
+```{r ggpairs, cache=TRUE, eval=FALSE, include = FALSE}
+
+# Generating pairs plot with correlation values and save the image
+
 ggpairs(final_data, columns = 5:8, 
         mapping = ggplot2::aes(colour=final_data$category_id), 
         upper = list(continuous = wrap("cor", size = 1.5)),
@@ -224,39 +254,237 @@ ggpairs(final_data, columns = 5:8,
           axis.ticks=element_blank())
 
 ggsave(file="corr.png", dpi=400)
+
 ```
 
-```{r echo=FALSE, out.width = '50%', out.height='50%'}
+```{r corr, echo=FALSE, out.width = '45%', out.height='45%', fig.cap = "Correlation information", fig.pos = 'H'}
 knitr::include_graphics("corr.png")
 ```
 
 All variables are positive correlated, having that `views` and `likes` are highly correlated (0.811) since the higher of views the more likely that video is liked by the viewers. This logic works also for the number of comments and the number of likes, that's the reason the correlation is high as well (0.846). Moreover, we have shown the correlation split by the different category ids and it is clear that this correlation value depends directly on the category of the video.
 
-Once we have analyzed the quantitative variables, we can move forward and describe a little bit the qualitative variables. For doing this, we are using the frequency tables showed below.
+Once we have analyzed the quantitative variables, we can move forward and describe a little bit the qualitative variables. For doing this, we are using the frequency tables showed in Table \ref{tab:freq_table}.
 
-```{r echo=FALSE}
+```{r freq_table, echo = FALSE}
+
+# Frequency tables for the qualitative variables
+
 cat_table <- data.frame(table(final_data$category_id))
 colnames(cat_table)[1] <- "category_id"
 cont_table <- data.frame(table(final_data$continent_id))
 colnames(cont_table)[1] <- "continent_id"
 comm_table <- data.frame(table(final_data$comments_disabled))
 colnames(comm_table)[1] <- "comments_disabled"
-knitr::kable(list(cat_table, cont_table, comm_table)) %>% 
+knitr::kable(list(cat_table, cont_table, comm_table), caption = "Frequency tables") %>% 
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 The three categorical variables are unbalanced, then there are not the same number of observations for each factor. As we could expect, there are more videos with the comments enabled. It is curious that there are more videos in Europe or America than in Asia, the reason might make sense since YouTube (belonging to Google) is a western company. In case of the number of videos by category, the one that has more videos is the `Film` category, followed by `Leisure`, `Education` and lastly `Music`. 
+
 
 # Model selection
 
 ## Selecting a continous random variable
 
+In this section we have selected the variable `views` with the purpose of estimating its parameters. The reason to choose this variable is based on the importance of knowing how are distributed the visualization of the top 200 YouTube videos. As we could see in the histograms visualized in Figure \ref{fig:hist} and commented before, the distribution of this variable is right-skewed so it is far from being distributed with a Normal. To achieve normality, or at least being closer, we could apply the log transformation to our variable. Notice that in this case, since the values are greater than zero, no offset is needed.
+
+```{r transf-norm, fig.width=8, fig.height=4, echo=FALSE, fig.pos='H', fig.cap="Log transformation of views variable", cache=TRUE}
+# 2.
+
+# Create variable log_views
+
+final_data <- final_data %>% mutate(
+  log_views = log(views)
+)
+
+# Plot the histogram and the QQ-plot
+
+par(mfrow = c(1,2))
+hist(final_data$log_views, probability = TRUE, main="Histogram log_views", 
+     xlab = "log(views)")
+lines(density(final_data$log_views), col = 4, lwd = 2)
+curve(dnorm(x, mean=mean(final_data$log_views), sd=sd(final_data$log_views)), 
+      add=TRUE, col="red")
+legend('topright', legend=c('non-parametric density', 'normal density'), 
+       col = c('blue', 'red'), pch = 0, cex = 0.5)
+qqnorm(final_data$log_views, pch = 1, frame = FALSE)
+qqline(final_data$log_views, col = 2, lwd = 2)
+```
+
+In the Figure \ref{fig:transf-norm} it is possible to see two different plots that checks whether normality is achieved or not. The plot on the left shows in total three components: two non-parametric components (the histogram of the distribution after applying the transformation and the blue line showing the density distribution of our data) and the third one that is a red line which shows the theoretical Normal density taking into account a estimation of the parameters of our data (sample mean and sample standard deviation). As we can see, the blue line fits almost perfectly the red line, except for the tails where lines are slightly different. This difference is also noticeable in the Q-Q plot, a chart that compares the sample quantiles with the theoretical Normal ones, showing that in the extremes of the sample the distribution is slightly different than a Gaussian but in general the distribution is adjusted perfectly. In conclusion, the `log_views` variable adapts smoothly to a Normal distribution therefore the untransformed variable `views` contains data that can be assumed to follow a log-normal distribution. Then, we have that:
+
+$$
+X_{views} \sim \mathrm{Lognormal}(\mu, \sigma^2)
+$$
+where $\mu$ and $\sigma^2$ are the parameters of interest. Having its probability density function as it follows:
+
+$$
+f(x; \mu, \sigma^2) = \frac{1}{x\sigma\sqrt{2\pi}}\exp\left(-\frac{(\log(x)-\mu)^2}{2\sigma^2}\right)
+$$
+
+In the following points we will estimate the parameters of interest of the distribution we have assumed for our variable `views`.
+
 ## Estimate the model parameters
+
+In this point we will estimate the parameters of interest of $X_{views} \sim \mathrm{Lognormal}(\boldsymbol\theta)$, where $\boldsymbol\theta = (\theta_1, \theta_2)'$, $\theta_1=\mu$ and $\theta_2=\sigma^2$, using two different approaches: method of moments and maximum likelihood estimation.
 
 ### Method of moments
 
-### Maximum likelihood
+First, let's define the population moments as: $\alpha_r = \alpha_r(\theta_1, \theta_2) \triangleq \mathbb{E}[X^r]$ and the sample moments as $\mathrm{a}_r \triangleq \frac{1}{n}\sum_{i=1}^n X_i^r$. Then, the moments estimators of $\theta_1$ and $\theta_2$ are the solutions of the 2 equations obtained by equating 2 population moments to the corresponding sample moments: $\alpha_{r_{2}}(\theta_1, \theta_2) = \mathrm{a}_{r_{2}}$. 
+
+Recall that the log-normal distribution has $\mathbb{E}[X]=e^{\mu+\sigma^2/2}$, then we can formulate the parts of our system of equations. In the population we have that $\alpha_1 =\exp\{\hat\mu_{mm}+\hat{\sigma}_{mm}^2/2\} = \exp{\{\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2/2}\} = \mathbb{E}[X]$ and $\alpha_2 = \exp\{2\hat\mu_{mm}+\hat{\sigma}_{mm}^2\} = \exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\} = \mathbb{E}[X^2]$ and in the sample side we have that $\mathrm{a}_1=\frac{1}{n}\sum_{i=1}^nx_i=\bar{x}$ and $\mathrm{a}_2=\frac{1}{n}\sum_{i=1}^nx_i^2$. Then equating $\alpha_1=\mathrm{a}_1$ and $\alpha_2 = \mathrm{a}_2$ we come to our system of equations:
+
+$$
+    \begin{cases}
+      \exp{\{\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2/2}\} = \frac{1}{n}\sum_{i=1}^nx_i\\
+      \exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\} = \frac{1}{n}\sum_{i=1}^nx_i^2
+    \end{cases}\,
+$$
+
+Analytically it can be shown that $\exp{\{2\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2}\} = \bar{x}^2$, then squaring both sides of the first equation we have this. Then we divide the second equation by the squared first:
+
+$$
+\frac{\exp{\{2\hat\mu_{mm}\}}\exp{\{2\hat{\sigma}_{mm}^2}\}}{\exp{\{2\hat\mu_{mm}\}}\exp{\{\hat{\sigma}_{mm}^2}\}} = \frac{\frac{1}{n}\sum_{i=1}^nx_i^2}{\left(\frac{1}{n}\sum_{i=1}^nx_i\right)^2} \rightarrow \exp{\{\hat{\sigma}_{mm}^2}\} = n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2 \rightarrow \hat{\sigma}_{mm}^2 = \log{\left[n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2\right]}
+$$
+
+Plug-in this into the first equation we have that
+
+$$
+\exp{\{\hat\mu_{mm}\}}\exp{\left\{\log{\left[n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2\right]/2}\right\}} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow \exp{\{\hat\mu_{mm}\}}\exp{\left\{\log{\sqrt{n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2}}\right\}} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow
+$$
+
+$$
+\rightarrow \exp{\{\hat\mu_{mm}\}}\sqrt{n \left(\sum_{i=1}^nx_i\right)^{-2}\sum_{i=1}^nx_i^2} = \frac{1}{n}\sum_{i=1}^nx_i \rightarrow \hat\mu_{mm} = \log{\left\{\frac{1}{n^{3/2}}\left(\sum_{i=1}^nx_i^2\right)^{-1/2}\left(\sum_{i=1}^nx_i\right)^{2}\right\}}
+$$
+
+Let's calculate using the formulas above the estimations of the parameters' values. The Table \ref{tab:method_moments} shows the results for $\hat\mu_{mm}$ and $\hat\sigma^2_{mm}$.
+
+```{r method_moments, echo = FALSE, fig.pos='H'}
+
+# Estimation using the method of the moments
+
+mu_mm <- log(1/length(final_data$views)^(3/2)*
+               sum(final_data$views^2)^{-1/2}*sum(final_data$views)^2)
+sigma2_mm <- log(length(final_data$views)*
+                   sum(final_data$views)^-2*sum(final_data$views^2))
+
+mm_est <- cbind(mu_mm, sigma2_mm)
+colnames(mm_est) <- c('mu', 'sigma^2')
+rownames(mm_est) <- c('Method of moments')
+
+knitr::kable(mm_est, caption="Method of moments estimators") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+In the Figure \ref{fig:est_moments} we can see the difference between the kernel density estimator of our data and the density of the log-normal distribution with the parameters we have just calculated. Notice that this difference is tiny, almost imperceptible.
+
+```{r est_moments, echo=FALSE, fig.pos='H', fig.width=5, fig.height=3, fig.cap="Method of moments, kde"}
+# Plot the non parametric kde of views and the density of the log-normal with the parameters
+
+kde <- density(log(final_data$views))
+kde_transf <- kde
+kde_transf$x <- exp(kde_transf$x)
+kde_transf$y <- kde_transf$y * 1 / kde_transf$x
+plot(kde_transf, main="", xlim = c(0, 500), xlab="")
+curve(dlnorm(x, mu_mm, sqrt(sigma2_mm)), from=0, to=500, col=4, 
+      ylab="frequency", xlab="views", add=TRUE)
+legend('topright', legend=c('non-parametric density', 'method of moments estimation'), 
+       col = c('black', 'blue'), pch = 0, cex = 0.5)
+
+```
+
+
+### Maximum likelihood estimation
+
+Now we will estimate the parameters using the maximum likelihood estimation. As we mentioned before, assuming that $X \sim \mathcal{LN}(\mu, \sigma^2)$ and let $X_1, \dots , X_n$ be a simple random sample that each of them is independent and identically distributed, then
+
+$$
+\mathrm{L}(\mu, \sigma^2; x_1, \dots, x_n) = f(x_1, \dots , x_n; \mu, \sigma^2) = \prod_{i=1}^nf(x_i;\mu,\sigma^2)= \frac{1}{\left(\sqrt{2\pi\sigma^2}\right)^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)
+$$
+
+Since the log-likelihood is more manageable and less cumbersome, we are going to apply logarithms to the formula above:
+
+\begin{align*}
+\ell(\mu, \sigma^2; x_1, \dots , x_n) 
+& = \log{\left[\frac{1}{\left(\sqrt{2\pi\sigma^2}\right)^n\prod_{i=1}^nx_i}\exp\left(-\frac{1}{2\sigma^2}\sum_{i=1}^n(log{(x_i)-\mu})^2\right)\right]} \\ 
+& = -\log\left(\sqrt{2\pi\sigma^2}\right)^n-\sum_{i=1}^n \log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\
+& = -\frac{n}{2}\log(2\pi\sigma^2)-\sum_{i=1}^n\log(x_i)-\frac{1}{2\sigma^2}\sum_{i=1}^n((\log{x_i})^2-2\mu\log{x_i}+\mu^2) \\
+& = -\frac{n}{2}\log(2\pi\sigma^2)-\sum_{i=1}^n\log(x_i)-\frac{\sum_{i=1}^n(\log{x_i})^2}{2\sigma^2}+\frac{\sum_{i=1}^n\mu\log{x_i}}{\sigma^2}-\frac{n\mu^2}{2\sigma^2}
+\end{align*}
+
+
+Then we have to look for values of $\hat\mu$ and $\hat\sigma^2$ that maximizes the log-likelihood. Then, we must find the partial derivative with respect both parameters, with respect $\mu$ we have that  
+
+\begin{align*}
+\frac{\partial}{\partial{\mu}}\ell(\mu, \sigma^2; X) 
+& = \frac{\partial}{\partial{\mu}}\frac{\sum_{i=1}^n\mu\log{x_i}}{\sigma^2}-\frac{n\hat\mu^2}{2\sigma^2} \\ 
+& = \frac{\sum_{i=1}^n\log{x_i}}{\sigma^2}-\frac{n\hat\mu}{\sigma^2} \\ 
+& \rightarrow \frac{\sum_{i=1}^n\log{x_i}}{\sigma^2}-\frac{n\hat\mu}{\sigma^2}=0 \\ 
+& \rightarrow n\hat\mu = \sum_{i=1}^n\log{x_i} \\
+& \rightarrow \hat\mu_{MLE} = \frac{\sum_{i=1}^n\log{x_i}}{n}
+\end{align*}
+
+and with respect $\sigma^2$ we have that
+
+\begin{align*}
+\frac{\partial}{\partial{\sigma^2}}\ell(\mu, \sigma^2; X) & = \frac{\partial}{\partial{\sigma^2}}\left[-\frac{n}{2}\log(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_{i=1}^n(\log{x_i}-\mu)^2\right] \\
+ & = -\frac{n}{2\sigma^2}-\frac{1}{2}(\sigma^2)^{-2}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\
+ & = -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\ 
+ & \rightarrow -\frac{n}{2\sigma^2}+\frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 = 0 \\
+ & \rightarrow \frac{n}{2\sigma^2} = \frac{1}{2\sigma^4}\sum_{i=1}^n(\log{x_i}-\mu)^2 \\ 
+ & \rightarrow \sigma^2_{MLE} = \frac{\sum_{i=1}^n(\log{x_i}-\mu)^2}{n}
+\end{align*}
+
+The parameters were calculated by equaling both partial derivations to zero, then we obtain $\hat\mu_{MLE}$ and $\hat\sigma^2_{MLE}$. In this case, for the log-normal distribution, the maximum likelihood estimators are identical to those for the Normal distribution where its observations were log-transformed.
+
+To verify that these estimators maximize the value of the log-likelihood function we must calculate the Hessian of the log-likelihood function and verify that it is negative-definite matrix. We have avoided calculations and we have just defined the resulting Hessian matrix below. It is negative-define, since the matrix is symmetric and all its pivots are negative, indicating a strict local maximum.
+
+$$
+\mathbf{H} = \begin{pmatrix}
+-\frac{n}{\sigma^2} & 0\\
+0 & -\frac{\sum_{i=1}^n(\log{x_i}-\mu)^2}{2(\sigma^2)^3}\\
+\end{pmatrix}
+$$
+
+Doing the calculations above with the data from the variable `views` we obtain the estimations described in the Table \ref{tab:mle}.
+
+```{r mle, echo = FALSE, fig.pos='H'}
+
+# Estimate the parameters using MLE
+
+mu_mle <- mean(log(final_data$views))
+sigma2_mle <- var(log(final_data$views))
+
+mle_est <- cbind(mu_mle, sigma2_mle)
+colnames(mle_est) <- c('mu', 'sigma^2')
+rownames(mle_est) <- c('Maximum likelihood estimation')
+
+knitr::kable(mle_est, caption="Maximum likelihood estimation") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+
+```
+
+In the Figure \ref{fig:mle_plot} we can see the difference between the kernel density estimator of our data and the density of the log-normal distribution with the parameters we have just calculated. As you can see comparing the green line with the black one, the distribution defined using the parameters calculated through MLE is not so accurate with respect the non-parametric estimation. In this case, the estimation is not as good as it was using the method of moments.
+
+```{r mle_plot, echo=FALSE, fig.pos='H', fig.width=5, fig.height=3, fig.cap="Maximum likelihood estimation, kde"}
+# Plot the non parametric kde of views and the density of the log-normal with the parameters
+
+kde <- density(log(final_data$views))
+kde_transf <- kde
+kde_transf$x <- exp(kde_transf$x)
+kde_transf$y <- kde_transf$y * 1 / kde_transf$x
+plot(kde_transf, main="", xlim = c(0, 500), xlab="")
+curve(dlnorm(x, mu_mle, sqrt(sigma2_mle)), from=0, to=500, col=3, 
+      ylab="frequency", xlab="views", add=TRUE)
+legend('topright', legend=c('non-parametric density', 'maximum likelihood estimation'), 
+       col = c('black', 'green4'), pch = 0, cex = 0.5)
+
+```
+
 
 # One-sample inference
 
@@ -311,6 +539,7 @@ We follow the same procedure for computing $CV_{\hat{\mu}_{2}}$:
 $$ CV_{\hat{\mu}_{2}} = \frac{\sqrt{Var(\hat{\mu}_{2})}}{E[\hat{\mu}_{2}]} = \frac{\sqrt{Var(X)}}{\sqrt{2}E[X]} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} $$
 
 ```{r cv, echo = FALSE}
+n <- length(final_data$views)
 cv_1 <- sqrt(exp(sigma2_mm)-1)/sqrt(n)
 cv_2 <- sqrt(exp(sigma2_mm)-1)/sqrt(2)
 cv <- cbind(cv_1, cv_2)
@@ -333,8 +562,7 @@ $$ \hat{\pi_4} = \frac{1}{n}\sum_{i=1}^{n}X_i $$
 
 ```{r proportion_music , echo = FALSE}
 prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
-print("The estimated proportion is:", prop_music)
-prop_music
+print(paste("The estimated proportion is:", prop_music))
 ```
 
 Thus, the 9% of the population are videos related with music.
@@ -352,4 +580,103 @@ Thus, since we know that $V(X)$ is equal to $\pi_k(1-\pi_k)$, since the categori
 $$
 \hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_k}(1-\hat{\pi_k})
 $$
+
+
+# Inference with more than one sample
+
+## Estimate the population mean of subgroups
+
+In this case, we are going to select the qualitative variable `category_id` to divide the population of the variable `views` into subgroups. Then, there will be four different groups associated to the factors `Film`, `Music`, `Education` and `Leisure`. Let $\bar{x}_{film}$, $\bar{x}_{music}$, $\bar{x}_{education}$ and $\bar{x}_{leisure}$ be the sample means of the number of views for each segment and let $s^2_{film}$, $s^2_{music}$, $s^2_{education}$ and $s^2_{leisure}$ be the sample variances of the number of views for each subgroup. 
+
+The estimation of the population mean can be obtained from the sample mean of each subgroup. Then, we have that $\hat\mu_{film} = \bar{x}_{film}$, $\hat\mu_{music} = \bar{x}_{music}$, $\hat\mu_{education} = \bar{x}_{education}$ and $\hat\mu_{leisure} = \bar{x}_{leisure}$.
+
+Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}\sqrt{n}} = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}}$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
+$$
+\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}_{film}} \quad 
+\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}_{music}} \quad 
+$$
+$$
+\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}_{education}} \quad 
+\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}_{leisure}}
+$$
+The coefficient of variation of the mean is used to estimate the required sample size for a given coefficient of variation. For our purposes, it shows what are the estimation of the population mean that varies the most, in this case the population mean of the category `Music` since its the larger value among all of the others. In the table \ref{tab:mu_groups} is summarized all these estimations.
+
+```{r mu_groups, echo = FALSE, fig.pos='H'}
+
+# CV_mu: coefficient of variation of the mean
+
+n_film <- length(final_data$views[final_data$category_id=='Film'])
+n_music <- length(final_data$views[final_data$category_id=='Music'])
+n_education <- length(final_data$views[final_data$category_id=='Education'])
+n_leisure <- length(final_data$views[final_data$category_id=='Leisure'])
+
+ns <- c(n_film, n_music, n_education, n_leisure)
+
+mu_film <- mean(final_data$views[final_data$category_id=='Film'])
+mu_music <- mean(final_data$views[final_data$category_id=='Music'])
+mu_education <- mean(final_data$views[final_data$category_id=='Education'])
+mu_leisure <- mean(final_data$views[final_data$category_id=='Leisure'])
+
+mus <- c(mu_film, mu_music, mu_education, mu_leisure)
+
+s2_film <- var(final_data$views[final_data$category_id=='Film'])
+s2_music <- var(final_data$views[final_data$category_id=='Music'])
+s2_education <- var(final_data$views[final_data$category_id=='Education'])
+s2_leisure <- var(final_data$views[final_data$category_id=='Leisure'])
+
+s2s <- c(s2_film, s2_music, s2_education, s2_leisure)
+ss <- sqrt(s2s)
+
+n <- length(final_data$views)
+
+cv_film <- sqrt(s2_film)/(sqrt(n_film)*mu_film)
+cv_music <- sqrt(s2_music)/(sqrt(n_music)*mu_music)
+cv_education <- sqrt(s2_education)/(sqrt(n_education)*mu_education)
+cv_leisure <- sqrt(s2_leisure)/(sqrt(n_leisure)*mu_leisure)
+
+cvs <- c(cv_film, cv_music, cv_education, cv_leisure)
+
+data_groups <- cbind(ns, mus, s2s, ss, cvs)
+colnames(data_groups) <- c('size', 'mu', 'sigma^2', 'sigma', 'CV(mu)')
+rownames(data_groups) <- c('Film', 'Music', 'Education', 'Leisure')
+
+knitr::kable(data_groups, 
+             caption="Estimations for each subgroup of the variable category id") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+## Estimation of the proportion of 
+
+In this section, we are going to calculate the proportion we calculated in point 3.4 but considering the qualitative variable we chose in the previous point. Then, we visualize the $\hat{p}$ for each factor in the Table \ref{tab:prop_cat_tot}.
+
+```{r prop_cat_tot, echo=FALSE}
+prop_film <- length(which(final_data$category_id=="Film"))/length(final_data$category_id)
+prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
+prop_education <- length(which(final_data$category_id=="Education"))/length(final_data$category_id)
+prop_leisure <- length(which(final_data$category_id=="Leisure"))/length(final_data$category_id)
+
+props <- rbind(prop_film, prop_music, prop_education, prop_leisure)
+colnames(props) <- c('p_hat')
+rownames(props) <- c('Film', 'Music', 'Education', 'Leisure')
+
+knitr::kable(props, 
+             caption="Estimation of the proportion for the category id variable") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=\frac{1}{n}p_i(1-p_i)$
+
+```{r mse_cat_tot, echo=FALSE}
+```
+
+\newpage
+# Apendix
+
+## Code
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
+
+```
 
