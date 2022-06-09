@@ -491,7 +491,87 @@ legend('topright', legend=c('non-parametric density', 'maximum likelihood estima
 
 ## Estimate the population mean of subgroups
 
+In this case, we are going to select the qualitative variable `category_id` to divide the population of the variable `views` into subgroups. Then, there will be four different groups associated to the factors `Film`, `Music`, `Education` and `Leisure`. Let $\bar{x}_{film}$, $\bar{x}_{music}$, $\bar{x}_{education}$ and $\bar{x}_{leisure}$ be the sample means of the number of views for each segment and let $s^2_{film}$, $s^2_{music}$, $s^2_{education}$ and $s^2_{leisure}$ be the sample variances of the number of views for each subgroup. 
 
+The estimation of the population mean can be obtained from the sample mean of each subgroup. Then, we have that $\hat\mu_{film} = \bar{x}_{film}$, $\hat\mu_{music} = \bar{x}_{music}$, $\hat\mu_{education} = \bar{x}_{education}$ and $\hat\mu_{leisure} = \bar{x}_{leisure}$.
+
+Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}\sqrt{n}} = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}}$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
+$$
+\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}_{film}} \quad 
+\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}_{music}} \quad 
+$$
+$$
+\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}_{education}} \quad 
+\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}_{leisure}}
+$$
+The coefficient of variation of the mean is used to estimate the required sample size for a given coefficient of variation. For our purposes, it shows what are the estimation of the population mean that varies the most, in this case the population mean of the category `Music` since its the larger value among all of the others. In the table \ref{tab:mu_groups} is summarized all these estimations.
+
+```{r mu_groups, echo = FALSE, fig.pos='H'}
+
+# CV_mu: coefficient of variation of the mean
+
+n_film <- length(final_data$views[final_data$category_id=='Film'])
+n_music <- length(final_data$views[final_data$category_id=='Music'])
+n_education <- length(final_data$views[final_data$category_id=='Education'])
+n_leisure <- length(final_data$views[final_data$category_id=='Leisure'])
+
+ns <- c(n_film, n_music, n_education, n_leisure)
+
+mu_film <- mean(final_data$views[final_data$category_id=='Film'])
+mu_music <- mean(final_data$views[final_data$category_id=='Music'])
+mu_education <- mean(final_data$views[final_data$category_id=='Education'])
+mu_leisure <- mean(final_data$views[final_data$category_id=='Leisure'])
+
+mus <- c(mu_film, mu_music, mu_education, mu_leisure)
+
+s2_film <- var(final_data$views[final_data$category_id=='Film'])
+s2_music <- var(final_data$views[final_data$category_id=='Music'])
+s2_education <- var(final_data$views[final_data$category_id=='Education'])
+s2_leisure <- var(final_data$views[final_data$category_id=='Leisure'])
+
+s2s <- c(s2_film, s2_music, s2_education, s2_leisure)
+ss <- sqrt(s2s)
+
+n <- length(final_data$views)
+
+cv_film <- sqrt(s2_film)/(sqrt(n_film)*mu_film)
+cv_music <- sqrt(s2_music)/(sqrt(n_music)*mu_music)
+cv_education <- sqrt(s2_education)/(sqrt(n_education)*mu_education)
+cv_leisure <- sqrt(s2_leisure)/(sqrt(n_leisure)*mu_leisure)
+
+cvs <- c(cv_film, cv_music, cv_education, cv_leisure)
+
+data_groups <- cbind(ns, mus, s2s, ss, cvs)
+colnames(data_groups) <- c('size', 'mu', 'sigma^2', 'sigma', 'CV(mu)')
+rownames(data_groups) <- c('Film', 'Music', 'Education', 'Leisure')
+
+knitr::kable(data_groups, 
+             caption="Estimations for each subgroup of the variable category id") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+## Estimation of the proportion of 
+
+In this section, we are going to calculate the proportion we calculated in point 3.4 but considering the qualitative variable we chose in the previous point. Then, we visualize the $\hat{p}$ for each factor in the Table \ref{tab:prop_cat_tot}.
+
+```{r prop_cat_tot, echo=FALSE}
+prop_film <- length(which(final_data$category_id=="Film"))/length(final_data$category_id)
+prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
+prop_education <- length(which(final_data$category_id=="Education"))/length(final_data$category_id)
+prop_leisure <- length(which(final_data$category_id=="Leisure"))/length(final_data$category_id)
+
+props <- rbind(prop_film, prop_music, prop_education, prop_leisure)
+colnames(props) <- c('p_hat')
+rownames(props) <- c('Film', 'Music', 'Education', 'Leisure')
+
+knitr::kable(props, 
+             caption="Estimation of the proportion for the category id variable") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=np_i(1-p_i)$
 
 \newpage
 # Apendix
