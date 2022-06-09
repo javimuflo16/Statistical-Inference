@@ -262,43 +262,65 @@ The three categorical variables are unbalanced, then there are not the same numb
 
 ## Estimators of population mean
 
-In this section, we use the continuous variable `views` in order to calculate two different estimators of the population mean. The estimators selected are the following ones:
+In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $Var(X) = E[X^{2}] - E[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$ The estimators selected are the following ones:
 
 $$
 \hat{\mu}_{1} = \bar{X} \quad and \quad  \hat{\mu}_{2} = \frac{X_{1} + X_{n}}{2}
 $$
+
 ```{r mean_estimators, echo = FALSE}
 mu_1 <- mean(final_data$views)
 mu_2 <- (min(final_data$views) + max(final_data$views))/2
-estimators <- c(mu_1, mu_2)
-names_estimators <- c("Estimator 1", "Estimator 2")
-values_mu <- cbind(names_estimators, estimators)
-knitr::kable(values_mu, col.names = c("Estimator", "Value of estimations"))
+estimators <- cbind(mu_1, mu_2)
+colnames(estimators) <- c("Estimator 1", "Estimator 2")
+rownames(estimators) <- c("Estimates")
+
+knitr::kable(estimators, caption="Estimates of estimators") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
 Now, let's analyze the properties of both estimators. First, we will see if any of them is unbiased.
 
-- $$ E[\hat{\mu}_{1}] = E[\bar{X}] = E[\frac{1}{n} \sum_{i=1}^{n} X_{i}] = \frac{1}{n} \sum_{i=1}^{n} E[X_i] = E[X] $$
+$$ E[\hat{\mu}_{1}] = E[\bar{X}] = E[\frac{1}{n} \sum_{i=1}^{n} X_{i}] = \frac{1}{n} \sum_{i=1}^{n} E[X_i] = E[X] = e^{\mu + \frac{\sigma^2}{2}}$$
 
-- $$ E[\hat{\mu}_{2}] = E[\frac{X_{1} + X_{n}}{2}] = \frac{1}{2}E[X_i + X_n] = E[X] $$
+$$ E[\hat{\mu}_{2}] = E[\frac{X_{1} + X_{n}}{2}] = \frac{1}{2}E[X_i + X_n] = E[X] = e^{\mu + \frac{\sigma}{2}}$$
 
 Hence both estimators are unbiased. Now, let's calculate the the variance of each one.
 
-- $$ V(\hat{\mu}_{1}) = V(\bar{X}) = V(\frac{1}{n} \sum_{i=1}^{n} X_{i}) = \frac{1}{n^2} \sum_{i=1}^{n} V(X_i) =  \frac{V(X)}{n} $$
+$$ Var(\hat{\mu}_{1}) = Var(\bar{X}) = Var(\frac{1}{n} \sum_{i=1}^{n} X_{i}) = \frac{1}{n^2} \sum_{i=1}^{n} Var(X_i) =  \frac{Var(X)}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}$$
 
-- $$ V(\hat{\mu}_{2}) = V(\frac{X_{1} + X_{n}}{2}) = \frac{1}{4}V(X_i + X_n) =  \frac{1}{2}V(X)$$
+- $$ Var(\hat{\mu}_{2}) = Var(\frac{X_{1} + X_{n}}{2}) = \frac{1}{4}Var(X_i + X_n) =  \frac{1}{2}Var(X) = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}$$
 
 It can be seen that the variance of $\hat{\mu}_{2}$ is higher that the variance of $\hat{\mu}_{1}$, as the latter one depends on $n$ (the number of observations) which in our case is much larger than 2. Therefore, the estimator with smaller variance is $\hat{\mu}_{1}$.
 
-Other property we can analyse is the consistency in squared mean. We know that if the bias and the variance tend to zero as $n \to \infty$. Therefore, since both estimators are unbiased but $\hat{\mu}_{2}$ does not tend to zero in the limit, so the only consistent estimator is $\hat{\mu}_{2}$.
+Other property we can analyse is the consistency in squared mean. We know that if the bias and the variance tend to zero as $n \to \infty$, then the estimator is consistent in squared mean. Therefore, since both estimators are unbiased but $\hat{\mu}_{2}$ does not tend to zero in the limit, the only consistent estimator is $\hat{\mu}_{1}$.
 
 ## Estimation of the error of the estimators
 
 As we have mentioned previously, the estimators selected are unbiased. Thus, we must estimate the coefficient of variation (CV). The coefficient of variation (CV) is defined as the ratio of the standard deviation $\sigma$ to the mean $\mu$, $CV = \frac{\sigma}{\mu}$. We calculate the $CV$ for both estimators:
 
-- $$ CV_{\hat{\mu}_{1}} = \frac{\sqrt{Var(\hat{\mu}_{1})}}{E[\hat{\mu}_{1}]} = \frac{\sqrt{Var(X)}}{\sqrt{n}E[X]} = $$
+$$ CV_{\hat{\mu}_{1}} = \frac{\sqrt{Var(\hat{\mu}_{1})}}{E[\hat{\mu}_{1}]} = \frac{\sqrt{Var(X)}}{\sqrt{n}E[X]} = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)e^{(\mu + \frac{\sigma^2}{2})^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}e^{(\mu + \frac{\sigma^2}{2})}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{n}}$$
 
-- $$ CV_{\hat{\mu}_{1}} = \frac{\sqrt{Var(\hat{\mu}_{1})}}{E[\hat{\mu}_{1}]} = \frac{\sqrt{Var(X)}}{\sqrt{2}E[X]} = $$
+We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus:
+
+$$ \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}$$
+
+We follow the same procedure for computing $CV_{\hat{\mu}_{2}}$:
+
+$$ CV_{\hat{\mu}_{2}} = \frac{\sqrt{Var(\hat{\mu}_{2})}}{E[\hat{\mu}_{2}]} = \frac{\sqrt{Var(X)}}{\sqrt{2}E[X]} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} $$
+
+```{r cv, echo = FALSE}
+cv_1 <- sqrt(exp(sigma2_mm)-1)/sqrt(n)
+cv_2 <- sqrt(exp(sigma2_mm)-1)/sqrt(2)
+cv <- cbind(cv_1, cv_2)
+colnames(estimators) <- c("CV 1", "CV 2")
+rownames(estimators) <- c("Error of estimations")
+
+knitr::kable(estimators, caption="Error of estimations") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
 
 ## Selection of a qualitative/categorical variable
 
@@ -314,6 +336,7 @@ prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$c
 print("The estimated proportion is:", prop_music)
 prop_music
 ```
+
 Thus, the 9% of the population are videos related with music.
 
 ## Estimation of the variance of the estimator of proportion
