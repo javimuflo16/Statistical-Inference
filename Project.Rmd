@@ -497,12 +497,12 @@ The estimation of the population mean can be obtained from the sample mean of ea
 
 Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}\sqrt{n}} = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}}$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
 $$
-\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}_{film}} \quad 
-\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}_{music}} \quad 
+\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}} \quad 
+\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}} \quad 
 $$
 $$
-\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}_{education}} \quad 
-\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}_{leisure}}
+\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}} \quad 
+\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}}
 $$
 The coefficient of variation of the mean is used to estimate the required sample size for a given coefficient of variation. For our purposes, it shows what are the estimation of the population mean that varies the most, in this case the population mean of the category `Music` since its the larger value among all of the others. In the table \ref{tab:mu_groups} is summarized all these estimations.
 
@@ -534,10 +534,10 @@ ss <- sqrt(s2s)
 
 n <- length(final_data$views)
 
-cv_film <- sqrt(s2_film)/(sqrt(n_film)*mu_film)
-cv_music <- sqrt(s2_music)/(sqrt(n_music)*mu_music)
-cv_education <- sqrt(s2_education)/(sqrt(n_education)*mu_education)
-cv_leisure <- sqrt(s2_leisure)/(sqrt(n_leisure)*mu_leisure)
+cv_film <- sqrt(s2_film)/(sqrt(n)*mu_film)
+cv_music <- sqrt(s2_music)/(sqrt(n)*mu_music)
+cv_education <- sqrt(s2_education)/(sqrt(n)*mu_education)
+cv_leisure <- sqrt(s2_leisure)/(sqrt(n)*mu_leisure)
 
 cvs <- c(cv_film, cv_music, cv_education, cv_leisure)
 
@@ -571,9 +571,22 @@ knitr::kable(props,
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
-Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=\frac{1}{n}p_i(1-p_i)$
+Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with parameters $n$ and $\mathbf{p}$, where $n=195582$ and $\mathbf{p}=(p_1, p_2, p_3, p_4)=(0.4056, 0.0912, 0.2200, 0.2832)$. Now, let's calculate the MSE for each factor of the categorical variable. Since the estimator of the proportion is unbiased, recall that an unbiased estimator has  $\mathrm{Bias}(\hat{p_i})=\mathbb{E}[\hat{p_i}]-p_i=0$ and then $\mathbb{E}[\hat{p_i}] = \mathbb{E}[X]=p_i$, therefore $\mathrm{MSE}(\hat{p_i})=\mathrm{Bias}^2(\hat{p_i})+\mathbb{V}\mathrm{ar}[\hat{p_i}]=\mathbb{V}\mathrm{ar}[\hat{p_i}]=\frac{1}{n}\hat{p}_i(1-\hat{p}_i)$, then $\hat{\mathrm{MSE}_i}=\frac{1}{n}\hat{p}_i(1-\hat{p}_i)$. In the Table \ref{tab:mse_cat_tot} is shown these estimations for each category. As we can see, the mean squared errors in all the cases are considerably small, this is because the sample size is really large.
 
 ```{r mse_cat_tot, echo=FALSE}
+mse_film <- 1/n*prop_film*(1-prop_film)
+mse_music <- 1/n*prop_music*(1-prop_music)
+mse_education <- 1/n*prop_education*(1-prop_education)
+mse_leisure <- 1/n*prop_leisure*(1-prop_leisure)
+
+mses <- rbind(mse_film, mse_music, mse_education, mse_leisure)
+colnames(mses) <- c('MSE_hat')
+rownames(mses) <- c('Film', 'Music', 'Education', 'Leisure')
+
+knitr::kable(mses, 
+             caption="Estimation of the MSE for the category id variable") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
 \newpage
