@@ -523,11 +523,11 @@ $$
 Hence both estimators are unbiased. Now, let's calculate the the variance of each one.
 
 $$
-\mathbb{V}\mathrm{ar}(\hat{\mu}_{1}) = \mathbb{V}\mathrm{ar}(\bar{X}) = \mathbb{V}\mathrm{ar}(\frac{1}{n} \sum_{i=1}^{n} X_{i}) = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{V}\mathrm{ar}(X_i) =  \frac{\mathbb{V}\mathrm{ar}(X)}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}
+\mathbb{V}\mathrm{ar}(\hat{\mu}_{1}) = \mathbb{V}\mathrm{ar}(\bar{X}) = \mathbb{V}\mathrm{ar}\left(\frac{1}{n} \sum_{i=1}^{n} X_{i}\right) = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{V}\mathrm{ar}(X_i) =  \frac{\mathbb{V}\mathrm{ar}(X)}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}
 $$
 
 $$
-\mathbb{V}\mathrm{ar}(\hat{\mu}_{2}) = \mathbb{V}\mathrm{ar}(\frac{X_{1} + X_{n}}{2}) = \frac{1}{4}\mathbb{V}\mathrm{ar}(X_i + X_n) =  \frac{1}{2}\mathbb{V}\mathrm{ar}(X) = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}
+\mathbb{V}\mathrm{ar}(\hat{\mu}_{2}) = \mathbb{V}\mathrm{ar}\left(\frac{X_{1} + X_{n}}{2}\right) = \frac{1}{4}\mathbb{V}\mathrm{ar}\left(X_i + X_n\right) =  \frac{1}{2}\mathbb{V}\mathrm{ar}(X) = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}
 $$
 
 It can be seen that the variance of $\hat{\mu}_{2}$ is higher that the variance of $\hat{\mu}_{1}$, as the latter one depends on $n$ (the number of observations) which in our case is much larger than 2. Therefore, the estimator with smaller variance is $\hat{\mu}_{1}$.
