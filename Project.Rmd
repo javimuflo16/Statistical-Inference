@@ -1,13 +1,13 @@
 ---
 title: |
+    \vspace{5cm} 
     ![](logo.png){width=1in}  
     Trend Videos
 subtitle: "Statistical Inference | Master in Statistics for Data Science"
 author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
-date: "17-05-2022"
+date: "June 2022"
 output: 
   pdf_document:
-    extra_dependencies: ["systeme"]
     number_sections: true
 ---
 
@@ -20,6 +20,10 @@ library(kableExtra)
 library(GGally)
 load("dataset.RData")
 ```
+
+\newpage
+
+\tableofcontents
 
 \newpage
 
@@ -775,15 +779,83 @@ knitr::kable(mses,
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
+## 4.3
+
+## 4.4
+
+## Comparing the proportions by means of a CI
+
+Considering the two simple random samples $X_{film}$ and $X_{music}$ (independent and identically distributed), and their proportions associated $\pi_{film}$ and $\pi_{music}$, respectively. Applying the Central Limit Theorem we have that $\bar\pi_i \sim \mathcal{N}\left(\pi_i, \frac{\pi_i(1-\pi_i)}{n_i}\right)$ where $i \in (\text{film},\ \text{music})$. Standardize it we have that $\frac{\bar\pi_i - \pi_i}{\sqrt{\frac{\pi_i(1-\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$. By the Algebra of Consistency we know that $\sqrt{\frac{\pi_i(1-\pi_i)}{\hat\pi_i(1-\hat\pi_i)}}\xrightarrow{P}1$ and then by the Slutsky's theorem we have that $\frac{\bar\pi_i - \pi_i}{\sqrt{\frac{\hat\pi_i(1-\hat\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$.
+
+Recall that the result of the difference of two random variables that are Normal and independent is another Normal random variable with $\mu = \mu_1 - \mu_2$ and $\sigma^2 = \sigma^2_1 + \sigma^2_2$, then we have that
+
+$$
+\bar\pi_{film}-\bar\pi_{music} \sim \mathcal{N}(\pi_{film}-\pi_{music}, \frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}})
+$$
+We have set a 95% confidence interval (the level of significance $\alpha=5$) and to make the formulas clearer we have set $\sigma^2_{film-music}=\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}$ then:
+
+$$
+\mathbb{P}\left[-Z_{\alpha/2} \leq \frac{\bar\pi_{film}-\bar\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\sigma^2_{film-music}}} \leq Z_{\alpha/2} \right] = 95 \rightarrow \\
+$$
+$$
+\rightarrow \mathbb{P}\left[(\bar\pi_{film}-\bar\pi_{music})-Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \leq \pi_{film}-\pi_{music} \leq
+(\bar\pi_{film}-\bar\pi_{music})+Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \right] = 95
+$$
+
+$$
+\mathrm{CI}(\pi_{film}-\pi_{music}) := (\bar\pi_{film}-\bar\pi_{music})\pm Z_{\frac{0.05}{2}}\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}
+$$
+
+Results are gathered in Table \ref{tab:ci_diff_prop}.
+
+```{r ci_diff_prop, fig.pos='H', echo=FALSE}
+
+diff_prop_film_music <- prop_film-prop_music
+
+var_x_film <- prop_film*(1-prop_film)/n_film
+var_x_music <- prop_music*(1-prop_music)/n_music
 
 
-## Comparing the proportions by means of a 95% CI
+lower_bound <- diff_prop_film_music + qnorm(0.05/2)*sqrt(var_x_film + var_x_music)
+upper_bound <- diff_prop_film_music + qnorm(0.95 + 0.05/2)*sqrt(var_x_film + var_x_music)
 
-Considering the two simple random samples $X_{film}$ and $X_{music}$ (independent and identically distributed), and their proportions associated $\pi_{film}$ and $\pi_{music}$, respectively. Applying the Central Limit Theorem we have that $\pi_i \sim \mathcal{N}\left(\pi_i, \frac{\pi_i(1-\pi_i)}{n_i}\right)$ where $i \in (\text{film},\ \text{music})$
+ci_prop_diff <- cbind(lower_bound, diff_prop_film_music, upper_bound)
+colnames(ci_prop_diff) <- c('Lower bound', 'Difference', 'Upper bound')
 
-## Comparing the proportions by means of hypothesis testing
+knitr::kable(ci_prop_diff, 
+             caption="Confidence Interval of the difference of proportions") %>% 
+  row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
 
+```
 
+## Comparing the equality of proportions by means of hypothesis testing
+
+Taking the standardized version of the proportions from the previous exercise, we could set an hypothesis test where the null hypothesis $H_0: \pi_{film} = \pi_{music}$ and the alternative hypothesis $H_1: \pi_{film} \neq \pi_{music}$, then the test statistic must be evaluated:
+
+$$
+Z = \frac{\bar\pi_{film}-\bar\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}} \underset{\pi_{film}=\pi_{music}}{=} \frac{\bar\pi_{film}-\bar\pi_{music}}{\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}}
+$$
+
+In Table \ref{tab:test_equal_prop} is shown the z-scored obtained and the quantile of Z for a 5% of level of significance. Since the z-scored is much larger than the quantile, we do reject the null hypothesis and we can say that the proportions are not equal.
+
+```{r test_equal_prop, fig.pos='H', echo=FALSE}
+z_score <- diff_prop_film_music/sqrt(var_x_film+var_x_music)
+
+test_diff <- cbind(z_score, round(-qnorm(0.025), 4))
+colnames(test_diff) <- c('z-score', 'Z_{0.05/2}')
+
+knitr::kable(test_diff, 
+             caption="Hypothesis test | Z statistic") %>% 
+  row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+# Conclusions
+
+## Summary
+
+## Limitations and extensions
 
 \newpage
 # Apendix
