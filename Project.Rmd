@@ -496,14 +496,16 @@ $$
 \hat{\mu}_{1} = \bar{X} \quad \text{and} \quad  \hat{\mu}_{2} = \frac{X_{1} + X_{n}}{2}
 $$
 
+In Table \ref{tab:mean_estimators} the results of the formulates above are shown. It is worthy to mention that $\hat{\mu}_2$ has a higher value than the other one.
+
 ```{r mean_estimators, echo = FALSE}
 mu_1 <- mean(final_data$views)
 mu_2 <- (min(final_data$views) + max(final_data$views))/2
 estimators <- cbind(mu_1, mu_2)
-colnames(estimators) <- c("Estimator 1", "Estimator 2")
-rownames(estimators) <- c("Estimates")
+colnames(estimators) <- c("Estimator mu^hat_1", "Estimator mu^hat_2")
+rownames(estimators) <- c("Estimation")
 
-knitr::kable(estimators, caption="Estimates of estimators") %>%
+knitr::kable(estimators, caption="Estimations of the population mean") %>%
 column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
 kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
@@ -685,14 +687,14 @@ In this case, we are going to select the qualitative variable `category_id` to d
 
 The estimation of the population mean can be obtained from the sample mean of each subgroup. Then, we have that $\hat\mu_{education} = \bar{x}_{education}$, $\hat\mu_{film} = \bar{x}_{film}$, $\hat\mu_{leisure} = \bar{x}_{leisure}$ and $\hat\mu_{music} = \bar{x}_{music}$.
 
-Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}\sqrt{n}} = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}}$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
+Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}}\times 100 = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}} \times 100$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
 $$
-\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}} \quad 
-\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}} \quad 
+\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}} \times 100 \quad 
+\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}} \times 100
 $$
 $$
-\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}}
-\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}} \quad 
+\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}} \times 100 \quad 
+\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}} \times 100 
 $$
 The coefficient of variation of the mean is used to estimate the required sample size for a given coefficient of variation. For our purposes, it shows what are the estimation of the population mean that varies the most, in this case the population mean of the category `Music` since its the larger value among all of the others. In the table \ref{tab:mu_groups} is summarized all these estimations.
 
@@ -720,19 +722,18 @@ s2_leisure <- var(final_data$views[final_data$category_id=='Leisure'])
 s2_music <- var(final_data$views[final_data$category_id=='Music'])
 
 s2s <- c(s2_education, s2_film, s2_leisure, s2_music)
-ss <- sqrt(s2s)
 
 n <- length(final_data$views)
 
-cv_education <- sqrt(s2_education)/(sqrt(n)*mu_education)
-cv_film <- sqrt(s2_film)/(sqrt(n)*mu_film)
-cv_leisure <- sqrt(s2_leisure)/(sqrt(n)*mu_leisure)
-cv_music <- sqrt(s2_music)/(sqrt(n)*mu_music)
+cv_education <- sqrt(s2_education)/(sqrt(n)*mu_education)*100
+cv_film <- sqrt(s2_film)/(sqrt(n)*mu_film)*100
+cv_leisure <- sqrt(s2_leisure)/(sqrt(n)*mu_leisure)*100
+cv_music <- sqrt(s2_music)/(sqrt(n)*mu_music)*100
 
 cvs <- c(cv_education, cv_film, cv_leisure, cv_music)
 
-data_groups <- cbind(ns, mus, s2s, ss, cvs)
-colnames(data_groups) <- c('size', 'mu', 'sigma^2', 'sigma', 'CV(mu)')
+data_groups <- cbind(ns, mus, s2s, cvs)
+colnames(data_groups) <- c('size', 'mu', 'sigma^2', 'CV(mu)%')
 rownames(data_groups) <- c('Education', 'Film', 'Leisure', 'Music')
 
 knitr::kable(data_groups, 
