@@ -576,7 +576,7 @@ Since the coefficient of variation for $\hat{\mu}_1$ is much smaller than $\math
 
 ## 95% confidence interval for the population mean
 
-Since we know that $X_{views} \sim \mathcal{LN}(\mu, \sigma^2)$, we can approximate it by the Central Limit Theorem $\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$. Hence, the 95% confidence interval for the population mean can be computed as follows:
+We approximate $\bar{X}$ of `views` by the Central Limit Theorem $\frac{\bar{X}_n-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$ for a large $n$. Hence, the 95% confidence interval for the population mean can be computed as follows:
 
 
 $$\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$$
@@ -777,7 +777,11 @@ knitr::kable(mses,
 ```
 
 
-## 95% CI
+## Comparing the proportions by means of a 95% CI
+
+Considering the two simple random samples $X_{film}$ and $X_{music}$ (independent and identically distributed), and their proportions associated $\pi_{film}$ and $\pi_{music}$, respectively. Applying the Central Limit Theorem we have that $\pi_i \sim \mathcal{N}\left(\pi_i, \frac{\pi_i(1-\pi_i)}{n_i}\right)$ where $i \in (\text{film},\ \text{music})$
+
+## Comparing the proportions by means of hypothesis testing
 
 
 
