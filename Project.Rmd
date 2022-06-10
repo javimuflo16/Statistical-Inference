@@ -416,7 +416,6 @@ Since the log-likelihood is more manageable and less cumbersome, we are going to
 \end{align*}
 
 
-
 Then we have to look for values of $\hat\mu$ and $\hat\sigma^2$ that maximizes the log-likelihood. Then, we must find the partial derivative with respect both parameters, with respect $\mu$ we have that  
 
 \begin{align*}
@@ -484,6 +483,166 @@ curve(dlnorm(x, mu_mle, sqrt(sigma2_mle)), from=0, to=500, col=3,
 legend('topright', legend=c('non-parametric density', 'maximum likelihood estimation'), 
        col = c('black', 'green4'), pch = 0, cex = 0.5)
 
+```
+
+
+# One-sample inference
+
+## Estimators of population mean
+
+In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $Var(X) = E[X^{2}] - E[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected are the following ones:
+
+$$
+\hat{\mu}_{1} = \bar{X} \quad and \quad  \hat{\mu}_{2} = \frac{X_{1} + X_{n}}{2}
+$$
+
+```{r mean_estimators, echo = FALSE}
+mu_1 <- mean(final_data$views)
+mu_2 <- (min(final_data$views) + max(final_data$views))/2
+estimators <- cbind(mu_1, mu_2)
+colnames(estimators) <- c("Estimator 1", "Estimator 2")
+rownames(estimators) <- c("Estimates")
+
+knitr::kable(estimators, caption="Estimates of estimators") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+Now, let's analyze the properties of both estimators. First, we will see if any of them is unbiased.
+
+$$E[\hat{\mu}_{1}] = E[\bar{X}] = E[\frac{1}{n} \sum_{i=1}^{n} X_{i}] = \frac{1}{n} \sum_{i=1}^{n} E[X_i] = E[X] = e^{\mu + \frac{\sigma^2}{2}}$$
+
+$$E[\hat{\mu}_{2}] = E[\frac{X_{1} + X_{n}}{2}] = \frac{1}{2}E[X_i + X_n] = E[X] = e^{\mu + \frac{\sigma}{2}}$$
+
+Hence both estimators are unbiased. Now, let's calculate the the variance of each one.
+
+$$Var(\hat{\mu}_{1}) = Var(\bar{X}) = Var(\frac{1}{n} \sum_{i=1}^{n} X_{i}) = \frac{1}{n^2} \sum_{i=1}^{n} Var(X_i) =  \frac{Var(X)}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}$$
+
+$$Var(\hat{\mu}_{2}) = Var(\frac{X_{1} + X_{n}}{2}) = \frac{1}{4}Var(X_i + X_n) =  \frac{1}{2}Var(X) = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}$$
+
+It can be seen that the variance of $\hat{\mu}_{2}$ is higher that the variance of $\hat{\mu}_{1}$, as the latter one depends on $n$ (the number of observations) which in our case is much larger than 2. Therefore, the estimator with smaller variance is $\hat{\mu}_{1}$.
+
+Other property we can analyse is the consistency in squared mean. We know that if the bias and the variance tend to zero as $n \to \infty$, then the estimator is consistent in squared mean. Therefore, since both estimators are unbiased but $\hat{\mu}_{2}$ does not tend to zero in the limit, the only consistent estimator is $\hat{\mu}_{1}$.
+
+## Estimation of the error of the estimators
+
+As we have mentioned previously, the estimators selected are unbiased. Thus, we must estimate the coefficient of variation (CV). The coefficient of variation (CV) is defined as the ratio of the standard deviation $\sigma$ to the mean $\mu$, $CV = \frac{\sigma}{\mu}$. We calculate the $CV$ for both estimators:
+
+$$CV_{\hat{\mu}_{1}} = \frac{\sqrt{Var(\hat{\mu}_{1})}}{E[\hat{\mu}_{1}]} = \frac{\sqrt{Var(X)}}{\sqrt{n}E[X]} = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} =$$
+$$= \frac{\sqrt{(e^{\sigma^2}-1)e^{(\mu + \frac{\sigma^2}{2})^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}e^{(\mu + \frac{\sigma^2}{2})}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{n}}$$
+
+We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus:
+
+$$CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}$$
+
+We follow the same procedure for computing $CV_{\hat{\mu}_{2}}$:
+
+$$CV_{\hat{\mu}_{2}} = \frac{\sqrt{Var(\hat{\mu}_{2})}}{E[\hat{\mu}_{2}]} = \frac{\sqrt{Var(X)}}{\sqrt{2}E[X]} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}}$$
+
+```{r cv, echo = FALSE}
+n <- length(final_data$views)
+cv_1 <- sqrt(exp(sigma2_mm)-1)/sqrt(n)
+cv_2 <- sqrt(exp(sigma2_mm)-1)/sqrt(2)
+cv <- cbind(cv_1, cv_2)
+colnames(cv) <- c("CV 1", "CV 2")
+rownames(cv) <- c("Error of estimations")
+
+knitr::kable(cv, caption="Error of estimations") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+
+## 95% confidence interval for the population mean
+
+Since we know that $X_{views} \sim LN(\mu, \frac{\sigma}{n})$, we can approximate it by the Central Limit Theorem $\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \sim N(0,1)$. Hence, the 95% confidence interval for the population mean can be computed as follows:
+
+
+$$CI_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$$
+As previously, we use the estimation of the variance $\hat{\sigma}^2_{mm}$ for computing the confidence interval. Thus:
+
+$$CI_{0.95}(\mu) = (\bar{X} - Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})$$
+
+```{r conf_interval_mean, echo = FALSE}
+sigma_mm <- sqrt(sigma2_mm)
+CI_lower <- mu_1 - qnorm(.95)*(sigma_mm/sqrt(n))
+CI_upper <- mu_1 + qnorm(.95)*(sigma_mm/sqrt(n))
+
+CI <- cbind(CI_lower, CI_upper)
+colnames(CI) <- c("Lower bound", "Upper bound")
+rownames(CI) <- c("Confidence interval for population mean")
+
+knitr::kable(CI, caption="Confidence interval for population mean") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+
+## Selection of a qualitative/categorical variable
+
+Now, we consider a categorical variable instead of a continuous one. We are interested in estimating the proportion of videos (in the population) that belong to a specific category. In particular, we want to know what proportion of videos are related with the music, i.e. the videos that belong to the category *Music* of the variable `category_id`.
+
+Since the variable `category_id` has four categories, it follows a multinomial distribution $Y \sim M(n, \boldsymbol{p})$ being $\boldsymbol{p}$ the vector of probabilities of belong to each category, i.e. $\boldsymbol{p} = \{\pi_1, \pi_2, \pi_3, \pi_4\} = \{Education, Film, Leisure, Music \}$. We can write $Y = \sum_{i=1}^{n} X_{i}$, where $X_i$ follows a Categorical distribution, a generalization of the Bernoulli distribution. We want to estimate the proportion $\pi_4 = P(X = Music)$ by computing the expression:
+
+$$\hat{\pi_4} = \frac{1}{n}\sum_{i=1}^{n}X_i$$
+
+
+```{r proportion_music , echo = FALSE}
+prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
+print(paste("The estimated proportion is:", prop_music))
+```
+
+Thus, the 9% of the population are videos related with music.
+
+## Estimation of the variance of the estimator of proportion
+
+Here we need to calculate the variance of the estimator $\hat{\pi_4}$:
+
+$$Var(\hat{\pi_4}) = Var(\frac{1}{n}\sum_{i=1}^{n}X_i) = \frac{1}{n^{2}}\sum_{i=1}^{n}Var(X_i) = \frac{1}{n}Var(X)$$
+
+Thus, since we know that $V(X)$ is equal to $\pi_k(1-\pi_k)$, since the categorical distribution is a generalized form of the Bernoulli distribution, we can estimate the variance of $\hat{pi_4}$ as follows:
+
+$$\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4})$$
+
+```{r proportion_music_variance , echo = FALSE}
+var_prop <- (1/n)*prop_music*(1-prop_music)
+print(paste("The estimated variance of the proportion is:", var_prop))
+```
+
+
+
+## 95% confidence interval for the population proportion
+
+By the CLT, we know that:
+
+$$\frac{\hat{p} - p}{\sqrt{p(1-p)/n}} \approx N(0,1)$$
+
+Furthermore, it is known that by the Algebra of Consistency:
+
+$$\sqrt{\frac{\hat{p}(1-\hat{p})}{p(1-p)}} \xrightarrow{P} 1$$
+
+Finally, by Slutsky’s Theorem, we obtain:
+
+$$\frac{\hat{p} - p}{\sqrt{\hat{p}(1-\hat{p})/n}} \approx N(0,1)$$
+
+Thus, we can get the 95% confidence interval for the proportion of music videos:
+
+$$
+CI_{0.95}(p) = (\hat{p} - Z_{0.05}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}, \hat{p} + Z_{0.05}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}})
+$$
+
+```{r conf_interval_prop, echo = FALSE}
+
+CI_p_lower <- prop_music - qnorm(.95)*(sqrt(prop_music*(1-prop_music)/n))
+CI_p_upper <- prop_music + qnorm(.95)*(sqrt(prop_music*(1-prop_music)/n))
+
+CI_p <- cbind(CI_p_lower, CI_p_upper)
+colnames(CI_p) <- c("Lower bound", "Upper bound")
+rownames(CI_p) <- c("Confidence interval for population proportion")
+
+knitr::kable(CI_p, caption="onfidence interval for population proportion") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
 
@@ -584,3 +743,4 @@ Our random variable $X_{category\_id} \sim \mathrm{Multin}(n,\mathbf{p})$ with p
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 
 ```
+
