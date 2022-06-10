@@ -365,10 +365,14 @@ Let's calculate using the formulas above the estimations of the parameters' valu
 
 # Estimation using the method of the moments
 
-mu_mm <- log(1/length(final_data$views)^(3/2)*
-               sum(final_data$views^2)^{-1/2}*sum(final_data$views)^2)
-sigma2_mm <- log(length(final_data$views)*
-                   sum(final_data$views)^-2*sum(final_data$views^2))
+method_moments_lnorm <- function(X) {
+  mu_mm <- log(1/length(X)^(3/2) * sum(X^2)^{-1/2}*sum(X)^2)
+  sigma2_mm <- log(length(X) * sum(X)^-2*sum(X^2))
+  return(list(mu=mu_mm, sigma2=sigma2_mm))
+}
+
+mu_mm <- method_moments_lnorm(final_data$views)$mu
+sigma2_mm <- method_moments_lnorm(final_data$views)$sigma2
 
 mm_est <- cbind(mu_mm, sigma2_mm)
 colnames(mm_est) <- c('mu', 'sigma^2')
@@ -455,8 +459,15 @@ Doing the calculations above with the data from the variable `views` we obtain t
 
 # Estimate the parameters using MLE
 
-mu_mle <- mean(log(final_data$views))
-sigma2_mle <- var(log(final_data$views))
+mle_lnorm <- function(X) {
+  mu_mm <- mean(log(X))
+  sigma2_mm <- var(log(X))
+  return(list(mu=mu_mm, sigma2=sigma2_mm))
+}
+
+
+mu_mle <- mle_lnorm(final_data$views)$mu
+sigma2_mle <- mle_lnorm(final_data$views)$sigma2
 
 mle_est <- cbind(mu_mle, sigma2_mle)
 colnames(mle_est) <- c('mu', 'sigma^2')
@@ -539,32 +550,38 @@ Other property we can analyse is the consistency in squared mean. We know that i
 As we have mentioned previously, the estimators selected are unbiased. Thus, we must estimate the coefficient of variation (CV). The coefficient of variation (CV) is defined as the ratio of the standard deviation $\sigma$ to the mean $\mu$, $CV = \frac{\sigma}{\mu}$. We calculate the $CV$ for both estimators:
 
 $$
-CV_{\hat{\mu}_{1}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{1})}}{\mathbb{E}[\hat{\mu}_{1}]} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{n}\mathbb{E}[X]} = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} =
+CV_{\hat{\mu}_{1}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{1})}}{\mathbb{E}[\hat{\mu}_{1}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{n}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 =
 $$
-$$= \frac{\sqrt{(e^{\sigma^2}-1)e^{(\mu + \frac{\sigma^2}{2})^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}e^{(\mu + \frac{\sigma^2}{2})}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{n}}$$
+$$
+= \frac{\sqrt{(e^{\sigma^2}-1)e^{(\mu + \frac{\sigma^2}{2})^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}e^{(\mu + \frac{\sigma^2}{2})}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{n}} \times 100
+$$
 
 We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus:
 
-$$CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}$$
+$$
+CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}\times 100
+$$
 
 We follow the same procedure for computing $CV_{\hat{\mu}_{2}}$:
 
 $$
-\mathrm{CV}_{\hat{\mu}_{2}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{2})}}{\mathbb{E}[\hat{\mu}_{2}]} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{2}\mathbb{E}[X]} = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}}
+\mathrm{CV}_{\hat{\mu}_{2}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{2})}}{\mathbb{E}[\hat{\mu}_{2}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{2}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} \times 100 = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} \times 100
 $$
 
 ```{r cv, echo = FALSE}
 n <- length(final_data$views)
-cv_1 <- sqrt(exp(sigma2_mm)-1)/sqrt(n)
-cv_2 <- sqrt(exp(sigma2_mm)-1)/sqrt(2)
+cv_1 <- sqrt(exp(sigma2_mm)-1)/sqrt(n) * 100
+cv_2 <- sqrt(exp(sigma2_mm)-1)/sqrt(2) * 100
 cv <- cbind(cv_1, cv_2)
-colnames(cv) <- c("CV 1", "CV 2")
+colnames(cv) <- c("CV_1 %", "CV_2 %")
 rownames(cv) <- c("Error of estimations")
 
 knitr::kable(cv, caption="Error of estimations") %>%
 column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
 kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
+
+Since the coefficient of variation for $\hat{\mu}_1$ is much smaller than $\mathrm{CV}_{\hat\mu_2}$, we can say that the error of the expected value of $\mu_1$ is considerably lower than the same for $\mu_2$ and therefore $\hat{\mu}_1$ is a more suitable estimator.
 
 
 ## 95% confidence interval for the population mean
@@ -681,76 +698,83 @@ kable_styling(latex_options = "HOLD_position", font_size = 7)
 
 # Inference with more than one sample
 
-## Estimate the population mean of subgroups
+## Estimate the population mean and the CV of subgroups
 
-In this case, we are going to select the qualitative variable `category_id` to divide the population of the variable `views` into subgroups. Then, there will be four different groups associated to the factors `Education`, `Film`, `Leisure` and `Music`. Let $\bar{x}_{education}$, $\bar{x}_{film}$, $\bar{x}_{leisure}$ and $\bar{x}_{music}$ be the sample means of the number of views for each segment and let $s^2_{education}$, $s^2_{film}$, $s^2_{leisure}$ and $s^2_{music}$ be the sample variances of the number of views for each subgroup. 
-
-The estimation of the population mean can be obtained from the sample mean of each subgroup. Then, we have that $\hat\mu_{education} = \bar{x}_{education}$, $\hat\mu_{film} = \bar{x}_{film}$, $\hat\mu_{leisure} = \bar{x}_{leisure}$ and $\hat\mu_{music} = \bar{x}_{music}$.
-
-Knowing that the formula of the coefficient of variation of the mean is: $\mathrm{CV} = \frac{\mathrm{SE}}{\bar{x}}\times 100 = \frac{\sqrt{s^2}}{\bar{x}\sqrt{n}} \times 100$ where $\mathrm{SE}$ stands for the standard error of the mean, we have that
-$$
-\mathrm{CV}_{\mu_{education}} = \frac{\sqrt{s^2}_{education}}{\bar{x}_{education}\sqrt{n}} \times 100 \quad 
-\mathrm{CV}_{\mu_{film}} = \frac{\sqrt{s^2}_{film}}{\bar{x}_{film}\sqrt{n}} \times 100
-$$
-$$
-\mathrm{CV}_{\mu_{leisure}} = \frac{\sqrt{s^2}_{leisure}}{\bar{x}_{leisure}\sqrt{n}} \times 100 \quad 
-\mathrm{CV}_{\mu_{music}} = \frac{\sqrt{s^2}_{music}}{\bar{x}_{music}\sqrt{n}} \times 100 
-$$
-The coefficient of variation of the mean is used to estimate the required sample size for a given coefficient of variation. For our purposes, it shows what are the estimation of the population mean that varies the most, in this case the population mean of the category `Music` since its the larger value among all of the others. In the table \ref{tab:mu_groups} is summarized all these estimations.
+In this case, we are going to select the qualitative variable `category_id` to divide the population of the variable `views` into subgroups. Then, there will be four different groups associated to the factors `Education`, `Film`, `Leisure` and `Music`. Each subgroups' population mean is estimated using the sample mean, as we did in point 3.1. Then, in our case we have one estimations per subgroup: $\hat\mu_{education} = \bar{x}_{education}$, $\hat\mu_{film} = \bar{x}_{film}$, $\hat\mu_{leisure} = \bar{x}_{leisure}$ and $\hat\mu_{music} = \bar{x}_{music}$. Table \ref{tab:mu_groups} summarizes this information.
 
 ```{r mu_groups, echo = FALSE, fig.pos='H'}
 
-# CV_mu: coefficient of variation of the mean
-
-n_education <- length(final_data$views[final_data$category_id=='Education'])
-n_film <- length(final_data$views[final_data$category_id=='Film'])
-n_leisure <- length(final_data$views[final_data$category_id=='Leisure'])
-n_music <- length(final_data$views[final_data$category_id=='Music'])
-
-ns <- c(n_education, n_film, n_leisure, n_music)
-
-mu_education <- mean(final_data$views[final_data$category_id=='Education'])
-mu_film <- mean(final_data$views[final_data$category_id=='Film'])
-mu_leisure <- mean(final_data$views[final_data$category_id=='Leisure'])
-mu_music <- mean(final_data$views[final_data$category_id=='Music'])
-
-mus <- c(mu_education, mu_film, mu_leisure, mu_music)
-
-s2_education <- var(final_data$views[final_data$category_id=='Education'])
-s2_film <- var(final_data$views[final_data$category_id=='Film'])
-s2_leisure <- var(final_data$views[final_data$category_id=='Leisure'])
-s2_music <- var(final_data$views[final_data$category_id=='Music'])
-
-s2s <- c(s2_education, s2_film, s2_leisure, s2_music)
+# Population mean estimation (sample mean) for each subgroup
 
 n <- length(final_data$views)
 
-cv_education <- sqrt(s2_education)/(sqrt(n)*mu_education)*100
-cv_film <- sqrt(s2_film)/(sqrt(n)*mu_film)*100
-cv_leisure <- sqrt(s2_leisure)/(sqrt(n)*mu_leisure)*100
-cv_music <- sqrt(s2_music)/(sqrt(n)*mu_music)*100
+x_education <- final_data$views[final_data$category_id=='Education']
+x_film <- final_data$views[final_data$category_id=='Film']
+x_leisure <- final_data$views[final_data$category_id=='Leisure']
+x_music <-final_data$views[final_data$category_id=='Music']
 
-cvs <- c(cv_education, cv_film, cv_leisure, cv_music)
+mu_education <- mean(x_education)
+mu_film <- mean(x_film)
+mu_leisure <- mean(x_leisure)
+mu_music <- mean(x_music)
 
-data_groups <- cbind(ns, mus, s2s, cvs)
-colnames(data_groups) <- c('size', 'mu', 'sigma^2', 'CV(mu)%')
-rownames(data_groups) <- c('Education', 'Film', 'Leisure', 'Music')
+mus <- c(mu_education, mu_film, mu_leisure, mu_music)
 
-knitr::kable(data_groups, 
-             caption="Estimations for each subgroup of the variable category id") %>% 
+mu_groups <- cbind(mus)
+colnames(mu_groups) <- c('mu^hat')
+rownames(mu_groups) <- c('Education', 'Film', 'Leisure', 'Music')
+
+knitr::kable(mu_groups, caption="Estimations of the population mean using sample mean") %>% 
   column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
-## Estimation of the proportion of 
+Recall from point 3.1 that the estimator $\hat\mu$ using the sample mean $\bar{x}$ is unbiased, then it has the following formula of the expected value $\mathbb{E}[\hat{\mu}] = \mathbb{E}[X]$ and the formula of the variance $\mathbb{V}\mathrm{ar}[\hat{\mu}] = \frac{1}{n}\mathbb{V}\mathrm{ar}[X]$. Recall also from point 3.2 that the formula of the coefficient of variation for the sample mean estimator of the population is $\mathrm{CV}_{\mu} = \frac{\sqrt{e^{\hat{\sigma^2}}-1}}{\sqrt{n}} \times 100$.
+
+Once we have described the bases, we are ready to apply these formulas with the data segmented by the `category_id`. The coefficient shows the percentage of error of the estimator's expected value. It is also used to estimate the required sample size for a given coefficient of variation. We have used for each category the $\hat\sigma^2$ based on the method of moments. In the table \ref{tab:cvs_groups} is shown the coefficient of variation of the estimator for each subgroup. In our case, the error presented in the expected value of each estimator is considerably low since all of them are below the 5%. The worst estimator comparing the their coefficients is the $\hat{\mu}_{music}$ since it contains a 4.58% of error in its expected value.
+
+
+```{r cvs_groups, echo = FALSE, fig.pos='H'}
+
+# CV_mu: coefficient of variation of the mean
+
+s2_mm_education <- method_moments_lnorm(x_education)$sigma2
+s2_mm_film <- method_moments_lnorm(x_film)$sigma2
+s2_mm_leisure <- method_moments_lnorm(x_leisure)$sigma2
+s2_mm_music <- method_moments_lnorm(x_music)$sigma2
+
+cv_education <- sqrt(exp(s2_mm_education)-1)/(sqrt(length(x_education)))*100
+cv_film <- sqrt(exp(s2_mm_film)-1)/(sqrt(length(x_film)))*100
+cv_leisure <- sqrt(exp(s2_mm_leisure)-1)/(sqrt(length(x_leisure)))*100
+cv_music <- sqrt(exp(s2_mm_music)-1)/(sqrt(length(x_music)))*100
+
+cvs <- c(cv_education, cv_film, cv_leisure, cv_music)
+
+cvs_groups <- cbind(cvs)
+colnames(cvs_groups) <- c('CV(mu) %')
+rownames(cvs_groups) <- c('Education', 'Film', 'Leisure', 'Music')
+
+knitr::kable(cvs_groups, 
+             caption="Coefficient of variation for the population mean estimator of each subgroup") %>% 
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>% 
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+
+## Estimate the proportion and the MSE
 
 In this section, we are going to calculate the proportion we calculated in point 3.4 but considering the qualitative variable we chose in the previous point. Then, we visualize the $\hat{\pi}$ for each factor in the Table \ref{tab:prop_cat_tot}.
 
 ```{r prop_cat_tot, echo=FALSE}
-prop_education <- length(which(final_data$category_id=="Education"))/length(final_data$category_id)
-prop_film <- length(which(final_data$category_id=="Film"))/length(final_data$category_id)
-prop_leisure <- length(which(final_data$category_id=="Leisure"))/length(final_data$category_id)
-prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
+n_education <- length(x_education)
+n_film <- length(x_film)
+n_leisure <- length(x_leisure)
+n_music <- length(x_music)
+
+prop_education <- n_education/length(final_data$category_id)
+prop_film <- n_film/length(final_data$category_id)
+prop_leisure <- n_leisure/length(final_data$category_id)
+prop_music <- n_music/length(final_data$category_id)
 
 props <- rbind(prop_education, prop_film, prop_leisure, prop_music)
 colnames(props) <- c('p_hat')
@@ -764,13 +788,13 @@ knitr::kable(props,
 
 Our random variable `category_id` defined as $X \sim \mathcal{M}\mathrm{ultin}(n,\boldsymbol\pi)$ with parameters $n$ and $\boldsymbol\pi$, where $n=195582$ and $\boldsymbol\pi=(\pi_1, \pi_2, \pi_3, \pi_4) = (0.2200, 0.4056, 0.2832, 0.0912)$ being $\pi_i$ so that $i=1$, $i=2$, $i = 3$ and $i = 4$ correspond to the categories `Education`, `Film`, `Leisure` and `Music`, respectively. 
 
-After proportions have been defined, we are ready to calculate the MSE for each estimator. Since this estimator is unbiased, that holds $\mathrm{Bias}(\hat{\pi_i})=\mathbb{E}[\hat{\pi_i}]-\pi_i=0$ and then $\mathbb{E}[\hat{\pi_i}] = \pi_i = \mathbb{E}[X]$, therefore $\mathrm{MSE}(\hat{\pi_i})=\mathrm{Bias}^2(\hat{\pi_i})+\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\frac{1}{n}\hat{\pi}_i(1-\hat{\pi}_i)$, then $\hat{\mathrm{MSE}_i}=\frac{1}{n}\hat{p}_i(1-\hat{p}_i)$. In the Table \ref{tab:mse_cat_tot} is shown these estimations for each category. As we can see, the mean squared errors in all the cases are considerably small, this is because the sample size is really large.
+After proportions have been calculated, we are ready to calculate the MSE for each estimator. Since this estimator is unbiased, that $\mathrm{Bias}(\hat{\pi_i})=\mathbb{E}[\hat{\pi_i}]-\pi_i=0$ holds and then $\mathbb{E}[\hat{\pi_i}] = \pi_i = \mathbb{E}[X]$, therefore $\mathrm{MSE}(\hat{\pi_i})=\mathrm{Bias}^2(\hat{\pi_i})+\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\frac{1}{n_i}\hat{\pi}_i(1-\hat{\pi}_i)$, then $\hat{\mathrm{MSE}_i}=\frac{1}{n_i}\hat{p}_i(1-\hat{p}_i)$. In the Table \ref{tab:mse_cat_tot} is shown these estimations for each category. As we can see, the mean squared errors in all the cases are considerably small since the sample size is really large.
 
 ```{r mse_cat_tot, echo=FALSE}
-mse_education <- 1/n*prop_education*(1-prop_education)
-mse_film <- 1/n*prop_film*(1-prop_film)
-mse_leisure <- 1/n*prop_leisure*(1-prop_leisure)
-mse_music <- 1/n*prop_music*(1-prop_music)
+mse_education <- 1/n_education*prop_education*(1-prop_education)
+mse_film <- 1/n_film*prop_film*(1-prop_film)
+mse_leisure <- 1/n_leisure*prop_leisure*(1-prop_leisure)
+mse_music <- 1/n_music*prop_music*(1-prop_music)
 
 mses <- rbind(mse_education, mse_film, mse_leisure, mse_music)
 colnames(mses) <- c('MSE_hat')
