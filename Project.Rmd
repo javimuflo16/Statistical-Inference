@@ -567,13 +567,15 @@ kable_styling(latex_options = "HOLD_position", font_size = 7)
 
 ## 95% confidence interval for the population mean
 
-Since we know that $X_{views} \sim \mathcal{LN}(\mu, \frac{\sigma}{n})$, we can approximate it by the Central Limit Theorem $\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$. Hence, the 95% confidence interval for the population mean can be computed as follows:
+Since we know that $X_{views} \sim \mathcal{LN}(\mu, \sigma^2)$, we can approximate it by the Central Limit Theorem $\frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$. Hence, the 95% confidence interval for the population mean can be computed as follows:
 
 
 $$\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$$
 As previously, we use the estimation of the variance $\hat{\sigma}^2_{mm}$ for computing the confidence interval. Thus:
 
 $$\mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})$$
+
+The Table \ref{tab:conf_interval_mean} shows the confidence interval (upper and lower bounds) for $\mu$.
 
 ```{r conf_interval_mean, echo = FALSE}
 sigma_mm <- sqrt(sigma2_mm)
@@ -598,10 +600,19 @@ Since the variable `category_id` has four categories, it follows a multinomial d
 
 $$\hat{\pi_4} = \frac{1}{n}\sum_{i=1}^{n}X_i$$
 
+The Table \ref{tab:proportion_music} shows the values of this estimator.
 
-```{r proportion_music , echo = FALSE}
+```{r proportion_music, echo = FALSE}
 prop_music <- length(which(final_data$category_id=="Music"))/length(final_data$category_id)
-print(paste("The estimated proportion is:", prop_music))
+
+props <- rbind(prop_music)
+colnames(props) <- c("pi^hat")
+rownames(props) <- c("Music")
+
+knitr::kable(props, caption="Proportion estimation for the Music category id") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
 
 Thus, the 9% of the population are videos related with music.
@@ -616,12 +627,20 @@ Thus, since we know that $\mathbb{V}\mathrm{ar}(X)$ is equal to $\pi_k(1-\pi_k)$
 
 $$\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4})$$
 
-```{r proportion_music_variance , echo = FALSE}
+The Table \ref{tab:var_proportion_music} shows the variance of the proportion estimator.
+
+```{r var_proportion_music, echo = FALSE}
 var_prop <- (1/n)*prop_music*(1-prop_music)
-print(paste("The estimated variance of the proportion is:", var_prop))
+
+var_prop <- rbind(var_prop)
+colnames(var_prop) <- c("variance^hat")
+rownames(var_prop) <- c("Music")
+
+knitr::kable(var_prop, caption="Variance of the proportion estimator") %>%
+  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+  kable_styling(latex_options = "HOLD_position", font_size = 7)
+
 ```
-
-
 
 ## 95% confidence interval for the population proportion
 
