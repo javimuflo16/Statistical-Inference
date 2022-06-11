@@ -856,25 +856,25 @@ Hence, since the value of the test statistic is higher than $Z_{0.025}$ we rejec
 
 ## Comparing of the difference of proportions using CI
 
-Considering the two simple random samples $X_{film}$ and $X_{music}$ (independent and identically distributed), and their proportions associated $\pi_{film}$ and $\pi_{music}$, respectively. Applying the Central Limit Theorem we have that $\bar\pi_i \sim \mathcal{N}\left(\pi_i, \frac{\pi_i(1-\pi_i)}{n_i}\right)$ where $i \in (\text{film},\ \text{music})$. Standardize it we have that $\frac{\bar\pi_i - \pi_i}{\sqrt{\frac{\pi_i(1-\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$. By the Algebra of Consistency we know that $\sqrt{\frac{\pi_i(1-\pi_i)}{\hat\pi_i(1-\hat\pi_i)}}\xrightarrow{P}1$ and then by the Slutsky's theorem we have that $\frac{\bar\pi_i - \pi_i}{\sqrt{\frac{\hat\pi_i(1-\hat\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$.
+Considering the two simple random samples $X_{film}$ and $X_{music}$ (independent and identically distributed), and their proportions associated $\pi_{film}$ and $\pi_{music}$, respectively. Applying the Central Limit Theorem we have that $\hat\pi_i \sim \mathcal{N}\left(\pi_i, \frac{\pi_i(1-\pi_i)}{n_i}\right)$ where $i \in (\text{film},\ \text{music})$. Standardize it we have that $\frac{\hat\pi_i - \pi_i}{\sqrt{\frac{\pi_i(1-\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$. By the Algebra of Consistency we know that $\sqrt{\frac{\pi_i(1-\pi_i)}{\hat\pi_i(1-\hat\pi_i)}}\xrightarrow{P}1$ and then by the Slutsky's theorem we have that $\frac{\hat\pi_i - \pi_i}{\sqrt{\frac{\hat\pi_i(1-\hat\pi_i)}{n_i}}} \sim \mathcal{N}(0, 1)$.
 
 Recall that the result of the difference of two random variables that are Normal and independent is another Normal random variable with $\mu = \mu_1 - \mu_2$ and $\sigma^2 = \sigma^2_1 + \sigma^2_2$, then we have that
 
 $$
-\bar\pi_{film}-\bar\pi_{music} \sim \mathcal{N}(\pi_{film}-\pi_{music}, \frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}})
+\hat\pi_{film}-\hat\pi_{music} \sim \mathcal{N}(\pi_{film}-\pi_{music}, \frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}})
 $$
 We have set a 95% confidence interval (the level of significance $\alpha=5$) and to make the formulas clearer we have set $\sigma^2_{film-music}=\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}$ then:
 
 $$
-\mathbb{P}\left[-Z_{\alpha/2} \leq \frac{\bar\pi_{film}-\bar\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\sigma^2_{film-music}}} \leq Z_{\alpha/2} \right] = 95 \rightarrow \\
+\mathbb{P}\left[-Z_{\alpha/2} \leq \frac{\hat\pi_{film}-\hat\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\sigma^2_{film-music}}} \leq Z_{\alpha/2} \right] = 95 \rightarrow \\
 $$
 $$
-\rightarrow \mathbb{P}\left[(\bar\pi_{film}-\bar\pi_{music})-Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \leq \pi_{film}-\pi_{music} \leq
-(\bar\pi_{film}-\bar\pi_{music})+Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \right] = 95
+\rightarrow \mathbb{P}\left[(\hat\pi_{film}-\hat\pi_{music})-Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \leq \pi_{film}-\pi_{music} \leq
+(\hat\pi_{film}-\hat\pi_{music})+Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \right] = 95
 $$
 
 $$
-\mathrm{CI}(\pi_{film}-\pi_{music}) := (\bar\pi_{film}-\bar\pi_{music})\pm Z_{\frac{0.05}{2}}\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}
+\mathrm{CI}(\pi_{film}-\pi_{music}) := (\hat\pi_{film}-\hat\pi_{music})\pm Z_{\frac{0.05}{2}}\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}
 $$
 
 Results are gathered in Table \ref{tab:ci_diff_prop}.
