@@ -748,6 +748,52 @@ knitr::kable(mses,
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
+## Comparison of the means for the two subgroups
+
+In this section we select, for instance, the subgroups *music* and *education* that we have defined in the previous point. We know, by the CLT, that $\bar{X}_i \sim N(\mu_i, \sigma^{2}_i/n_i)$ for i = *music*, *education*. The difference of sample means can be defined as $\bar{X}_{music} - \bar{X}_ {education} \sim N(\mu_{music}-\mu_{education}, \frac{\sigma^{2}_{music}}{n_1} + \frac{\sigma^{2}_{education}}{n_2})$. By the Slutsky’s theorem we obtain $N(\mu_{music}-\mu_{education}, \frac{\sigma^{2}_{music}}{n_1} + \frac{\sigma^{2}_{eductaion}}{n_2}) \approx N(0,1)$. Thus, we can define the 95% confidence interval as follows:
+
+$$
+CI_{0.95}(\mu_{music}-\mu_{education}) = ((\hat{\mu}_{music}-\hat{\mu}_{education}) - Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}, (\hat{\mu}_{music}-\hat{\mu}_{education}) + Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}  
+$$
+```{r conf_interval_submean, echo = FALSE}
+
+CI_submean_lower <- (mu_music - mu_education) - qnorm(.95)*(sqrt((s2_education/n_education) + (s2_music/n_music)))
+mean_diff <- mu_music - mu_education
+CI_submean_upper <- (mu_music - mu_education) + qnorm(.95)*(sqrt((s2_education/n_education) + (s2_music/n_music)))
+
+CI_submean <- cbind(CI_submean_lower, mean_diff, CI_submean_upper)
+colnames(CI_submean) <- c("Lower bound", "Estimation of mean difference", "Upper bound")
+rownames(CI_submean) <- c("Confidence interval for population mean subgroups")
+
+knitr::kable(CI_submean, caption="Confidence interval for population mean subgroups") %>%
+column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
+kable_styling(latex_options = "HOLD_position", font_size = 7)
+```
+
+Therefore, we can see that the mean of the views of music videos is higher than the one of the education videos, i.e. more people visualize music videos than education videos.
+
+## Compare the means of for the two subgroups by means of hypothesis testing of equality of means
+
+First, we state the two hypothesis of the case:
+
+$$H_0 : \mu_{music} = \mu_{education}$$
+$$H_1 : \mu_{music} \neq \mu_{education}$$
+We want to know if we should reject or not the null hypothesis at significance level $\alpha = 0.05$. For this purpose, we perform the following test statistic used for large samples as in our case:
+
+$$
+Z = \frac{\hat{\mu}_{music}-\hat{\mu}_{education}}{\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}} \approx N(0,1)
+$$
+Thus, we reject $H_0$ if $|Z| > Z_{\alpha/2}$, i.e. if $|Z| > Z_{0.025}$.
+
+```{r hypothesis_submean_equal, echo = FALSE}
+Z <- (mu_music-mu_education)/sqrt((s2_music/n_music)+(s2_education/n_education))
+Z_alpha2 <-qnorm(0.975)
+print(paste("Value of test statistic(Z):",Z))
+print(paste("Value of Z_0.025:", Z_alpha2))
+```
+
+Hence, since the value of the test statistic is higher than $Z_{0.025}$ we reject the null hypothesis and we can confirm that both means are not equal at all.
+
 \newpage
 # Apendix
 
