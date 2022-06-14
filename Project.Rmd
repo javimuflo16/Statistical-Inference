@@ -298,7 +298,7 @@ The three categorical variables are unbalanced, then there are not the same numb
 
 In this section we have selected the variable `views` with the purpose of estimating its parameters. The reason to choose this variable is based on the importance of knowing how are distributed the visualization of the top 200 YouTube videos. As we could see in the histograms visualized in Figure \ref{fig:hist} and commented before, the distribution of this variable is right-skewed so it is far from being distributed with a Normal. To achieve normality, or at least being closer, we could apply the log transformation to our variable. Notice that in this case, since the values are greater than zero, no offset is needed.
 
-```{r transf-norm, fig.width=8, fig.height=4, echo=FALSE, fig.pos='H', fig.cap="Log transformation of views variable", cache=TRUE}
+```{r create_trans_form, cache=TRUE, eval=FALSE, include = FALSE}
 # 2.
 
 # Create variable log_views
@@ -319,6 +319,10 @@ legend('topright', legend=c('non-parametric density', 'normal density'),
        col = c('blue', 'red'), pch = 0, cex = 0.5)
 qqnorm(final_data$log_views, pch = 1, frame = FALSE)
 qqline(final_data$log_views, col = 2, lwd = 2)
+```
+
+```{r transf-norm, echo=FALSE, out.width = '100%', out.height='35%', fig.cap = "Log transformation of views variable", fig.pos = 'H'}
+knitr::include_graphics("log_views_figures.png")
 ```
 
 In the Figure \ref{fig:transf-norm} it is possible to see two different plots that checks whether normality is achieved or not. The plot on the left shows in total three components: two non-parametric components (the histogram of the distribution after applying the transformation and the blue line showing the density distribution of our data) and the third one that is a red line which shows the theoretical Normal density taking into account a estimation of the parameters of our data (sample mean and sample standard deviation). As we can see, the blue line fits almost perfectly the red line, except for the tails where lines are slightly different. This difference is also noticeable in the Q-Q plot, a chart that compares the sample quantiles with the theoretical Normal ones, showing that in the extremes of the sample the distribution is slightly different than a Gaussian but in general the distribution is adjusted perfectly. In conclusion, the `log_views` variable adapts smoothly to a Normal distribution therefore the untransformed variable `views` contains data that can be assumed to follow a log-normal distribution. Then, we have that:
