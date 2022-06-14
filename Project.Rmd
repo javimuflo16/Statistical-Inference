@@ -510,7 +510,7 @@ legend('topright', legend=c('non-parametric density', 'maximum likelihood estima
 
 ## Estimators of population mean
 
-In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $\mathbb{V}\mathrm{ar}(X) = \mathbb{E}[X^{2}] - \mathbb{E}[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected and their valua associated are the following: 
+In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $\mathbb{V}\mathrm{ar}(X) = \mathbb{E}[X^{2}] - \mathbb{E}[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected and their value associated are the following: 
 $$
 \small
 \hat{\mu}_{1} = \bar{X} =  561.1358 \quad \text{and} \quad \hat{\mu}_{2} = \frac{X_{1} + X_{n}}{2} = 258001.8
@@ -594,7 +594,7 @@ $$
 \mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})
 $$
 
-The Table \ref{tab:conf_interval_mean} shows the confidence interval (upper and lower bounds) for $\mu$.
+The confidence interval (upper and lower bounds) obtained for $\mu$ is $(561.1282, 561.1435)$.
 
 ```{r conf_interval_mean, echo = FALSE}
 
@@ -608,17 +608,14 @@ CI <- cbind(CI_lower, CI_upper)
 colnames(CI) <- c("Lower bound", "Upper bound")
 rownames(CI) <- c("Confidence interval for population mean")
 
-knitr::kable(CI, caption="Confidence interval for population mean") %>%
-column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
-kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
 
 ## Estimation of a qualitative variable's proportion
 
-Now, we consider a categorical variable instead of a continuous one. We are interested in estimating the proportion of videos (in the population) that belong to a specific category. In particular, we want to know what proportion of videos are related with the music, i.e. the videos that belong to the category *Music* of the variable `category_id`.
+Now, we consider a categorical variable instead of a continuous one. We are interested in estimating the population's proportion of videos that belongs to a specific category. In particular, we want to know what proportion of videos are related to music, i.e. the videos that belong to the factor `Music` of the qualitative variable `category_id`.
 
-Since the variable `category_id` has four categories, it follows a multinomial distribution $Y \sim \mathcal{M}\mathrm{ultinom}(n, \boldsymbol{\pi})$ being $\boldsymbol{\pi}$ the vector of probabilities of belong to each category, i.e. $\boldsymbol{\pi} = \{\pi_1, \pi_2, \pi_3, \pi_4\} = \{\pi_{Education}, \pi_{Film}, \pi_{Leisure}, \pi_{Music} \}$. We can write $Y = \sum_{i=1}^{n} X_{i}$, where $X_i$ follows a Categorical distribution, a generalization of the Bernoulli distribution. We want to estimate the proportion $\pi_4 = P(X = Music)$ by computing the expression $\hat{\pi_4} = \frac{1}{n}\sum_{i=1}^{n}X_i = 0.0912$. We conclude that the 9% of the population are videos related with music.
+Since the variable `category_id` has four categories, it follows a multinomial distribution $Y \sim \mathcal{M}\mathrm{ultinom}(n, \boldsymbol{\pi})$ being $\boldsymbol{\pi}$ the vector of probabilities of belong to each category, i.e. $\boldsymbol{\pi} = \{\pi_1, \pi_2, \pi_3, \pi_4\} = \{\pi_{Education}, \pi_{Film}, \pi_{Leisure}, \pi_{Music} \}$. We can write $Y = \sum_{i=1}^{n} X_{i}$, where $X_i$ follows a Categorical distribution, a generalization of the Bernoulli distribution. We want to estimate the proportion $\pi_4 = P(X = Music)$ by computing the expression $\hat{\pi_4} = \frac{1}{n}\sum_{i=1}^{n}X_i = 0.0912$. We conclude that the 9% of the population are videos related with music. As it occurred with the quantitative case, this estimator is unbiased since the $\mathbb{E}[\hat\pi_{4}]=\mathbb{E}[X_{4}]$.
 
 ```{r proportion_music, echo = FALSE}
 
@@ -643,7 +640,7 @@ $$
 Var(\hat{\pi_4}) = \mathbb{V}\mathrm{ar}(\frac{1}{n}\sum_{i=1}^{n}X_i) = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathbb{V}\mathrm{ar}(X_i) = \frac{1}{n}\mathbb{V}\mathrm{ar}(X)
 $$
 
-Thus, since we know that $\mathbb{V}\mathrm{ar}(X)$ is equal to $\pi_k(1-\pi_k)$, since the categorical distribution is a generalized form of the Bernoulli distribution, we can estimate the variance of $\hat{\pi_4}$ as follows $\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4})$. The Table \ref{tab:var_proportion_music} shows the variance of the proportion estimator.
+Thus, since we know that $\mathbb{V}\mathrm{ar}(X)$ is equal to $\pi_k(1-\pi_k)$ and that the categorical distribution is a generalized form of the Bernoulli distribution, we can estimate the variance of $\hat{\pi_4}$ as follows $\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4}) = 4 \times 10^{-07}$. This value is considerable smaller, being a good quality of an estimator, since the variance depends on the sample size, $\frac{1}{n}$, and this value in our data set is sizeable.
 
 ```{r var_proportion_music, echo = FALSE}
 
@@ -655,10 +652,6 @@ var_prop <- rbind(var_prop)
 colnames(var_prop) <- c("variance^hat")
 rownames(var_prop) <- c("Music")
 
-knitr::kable(var_prop, caption="Variance of the proportion estimator") %>%
-  column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
-  kable_styling(latex_options = "HOLD_position", font_size = 7)
-
 ```
 
 ## 95% confidence interval for the population proportion
@@ -667,7 +660,7 @@ By the CLT, we know that $\frac{\hat{\pi} - \pi}{\sqrt{\pi(1-\pi)/n}} \approx N(
 
 $$
 \small
-\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}}, \hat{\pi} + Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}})
+\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}}, \hat{\pi} + Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}}) = (0.090, 0.092)
 $$
 
 ```{r conf_interval_prop, echo = FALSE}
@@ -681,9 +674,6 @@ CI_p <- cbind(CI_p_lower, CI_p_upper)
 colnames(CI_p) <- c("Lower bound", "Upper bound")
 rownames(CI_p) <- c("Confidence interval for population proportion")
 
-knitr::kable(CI_p, caption="onfidence interval for population proportion") %>%
-column_spec(1, bold=TRUE) %>% row_spec(0, bold=TRUE) %>%
-kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
 \newpage
@@ -808,21 +798,21 @@ knitr::kable(mses,
 In this section we select, for instance, the subgroups *music* and *education* that we have defined in the previous point. We know, by the CLT, that $\bar{X}_i \sim N(\mu_i, \sigma^{2}_i/n_i)$ for i = *music*, *education*. The difference of sample means can be defined as $\bar{X}_{music} - \bar{X}_ {education} \sim N(\mu_{music}-\mu_{education}, \frac{\sigma^{2}_{music}}{n_1} + \frac{\sigma^{2}_{education}}{n_2})$. By the Slutsky’s theorem we obtain $N(\mu_{music}-\mu_{education}, \frac{\sigma^{2}_{music}}{n_1} + \frac{\sigma^{2}_{eductaion}}{n_2}) \approx N(0,1)$. Thus, we can define the 95% confidence interval as follows:
 
 $$
-CI_{0.95}(\mu_{music}-\mu_{education}) =
+CI_{0.95}(\mu_{film}-\mu_{music}) =
 $$
 $$
-=((\hat{\mu}_{music}-\hat{\mu}_{education}) - Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}, (\hat{\mu}_{music}-\hat{\mu}_{education}) + Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}  
+=((\hat{\mu}_{film}-\hat{\mu}_{music}) - Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}, (\hat{\mu}_{film}-\hat{\mu}_{music}) + Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}  
 $$
 
 ```{r conf_interval_submean, echo = FALSE}
 
 # Confidence interval for two subgroup of the mean 
 
-CI_submean_lower <- (mu_music - mu_education) + qnorm(.025)*
-  (sqrt((s2_mm_education/n_education) + (s2_mm_music/n_music)))
-mean_diff <- mu_music - mu_education
-CI_submean_upper <- (mu_music - mu_education) + qnorm(.975)*
-  (sqrt((s2_mm_education/n_education) + (s2_mm_music/n_music)))
+CI_submean_lower <- (mu_film - mu_music) + qnorm(.025)*
+  (sqrt((s2_mm_film / n_film) + (s2_mm_music / n_music)))
+mean_diff <- mu_film - mu_music
+CI_submean_upper <- (mu_film - mu_music) + qnorm(.975)*
+  (sqrt((s2_mm_film / n_film) + (s2_mm_music / n_music)))
 
 CI_submean <- cbind(CI_submean_lower, mean_diff, CI_submean_upper)
 colnames(CI_submean) <- c("Lower bound", "Estimation of mean difference", "Upper bound")
@@ -840,30 +830,26 @@ Therefore, we can see that the mean of the views of music videos is higher than 
 First, we state the two hypothesis of the case:
 
 $$
-H_0 : \mu_{music} = \mu_{education}
+H_0 : \mu_{film} = \mu_{music}
 $$
 $$
-H_1 : \mu_{music} \neq \mu_{education}
+H_1 : \mu_{film} \neq \mu_{music}
 $$
 We want to know if we should reject or not the null hypothesis at significance level $\alpha = 0.05$. For this purpose, we perform the following test statistic used for large samples as in our case:
 
 $$
 \small
-Z = \frac{\hat{\mu}_{music}-\hat{\mu}_{education}}{\sqrt{\frac{\hat{\sigma^{2}}_{music}}{n_{music}} + \frac{\hat{\sigma^{2}}_{education}}{n_{education}}}} \approx N(0,1)
+Z = \frac{\hat{\mu}_{film}-\hat{\mu}_{music}}{\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}} \approx N(0,1)
 $$
-Thus, we reject $H_0$ if $|Z| > Z_{\alpha/2}$, i.e. if $|Z| > Z_{0.025}$.
+Thus, we reject $H_0$ if $|Z| > Z_{\alpha/2}$, i.e. if $|Z| > Z_{0.025}$. The results is $|Z|=95658.03$ related to a $Z_{0.025}=1.96$. Hence, since the value of the test statistic is higher than $Z_{0.025}$ we reject the null hypothesis and we can confirm that both means are not equal at all.
 
 ```{r hypothesis_submean_equal, echo = FALSE}
 
 # Hypothesis testing to compare means of two subgroups
 
-Z <- (mu_music-mu_education)/sqrt((s2_mm_music/n_music) + (s2_mm_education/n_education))
-Z_alpha2 <- qnorm(0.975)
-print(paste("Value of test statistic(Z):",Z))
-print(paste("Value of Z_0.025:", Z_alpha2))
+Z <- (mu_film-mu_music)/sqrt((s2_mm_film/n_film) + (s2_mm_music/n_music))
+Z_alpha2 <- qnorm(0.025)
 ```
-
-Hence, since the value of the test statistic is higher than $Z_{0.025}$ we reject the null hypothesis and we can confirm that both means are not equal at all.
 
 ## Comparing of the difference of proportions using CI
 
@@ -943,6 +929,8 @@ knitr::kable(test_diff,
   kable_styling(latex_options = "HOLD_position", font_size = 7)
 ```
 
+\newpage
+
 # Conclusions
 
 ## Summary
@@ -954,6 +942,10 @@ For the first group, we have analyzed them by means of some measures of centrali
 For the qualitative variables, we showed three frequency tables for the `category_id`, the `continent_id` and the `comments_disabled` variables, respectively (See Table \ref{tab:freq_table}). Since the all three variables do not contain the same number of factors, we said that the variables are not well-balanced. The factor from `category_id` that contains more observations is `Film`, with 40.56% observations (more than one third of the total videos), the factor from `continent_id` that has more rows is `Europe`, with a 46.52% of observations (almost the half of the total videos), and the last variable, that is binary, with a large amount of videos that have the comments enable (almost 97% of the observations).
 
 In the [point 2](#model-selection), we selected the variable `views` to apply some inference. Firstly, as it was suggested in the description of the project, we applied the log transformation since the data is concentrated on the left side of the distribution. After this conversion, we could see that the transformed variable clearly follows a Normal distribution (See Figures \ref{fig:transf-norm}), this means that the original variable might follow a Log-normal distribution with parameters $\mu$ and $\sigma^2$. In this section, we calculated these parameters by means of the method of moments and, additionally, the maximum likelihood estimation. Graphically, we could see that the method of moments, in this case, provides better results since the distribution generated gets closer to the non-parametric kernel density estimation (See Figure \ref{fig:mle_plot}).
+
+The next point is about doing one-sample inference, at the beginning we applied some inference methods to a quantitative variable and at the end we worked with a qualitative one. First, we started defining two different estimators of the population mean for the variable `views`: the sample mean and the mean of the highest and the lowest. We checked that the value of the last estimator is considerably larger than the first one since our data set a larger number of observations. Also, we assessed the statistical bias, showing that both estimators are unbiased since their expected value is the same than the expected value of our random variable `views`. In contrast, it does not happen the same for the variance, being much higher for the estimator of the mean of the highest and the lowest. Besides that, we have checked that the only estimator consistent in squared mean is the estimator of the sample mean. The coefficient of variation, since both estimators are unbiased, shows also that the estimator of the mean of the highest and the lowest contains a significantly larger error of the expected value than the other estimator. Hence, we concluded that the estimator of the sample mean is more suitable. We proceeded at this point to calculate a confidence interval for the true value of the population mean, obtaining that it is within 561.128 and 561.144. Notice that the value obtained with the sample mean estimator, 561.135, is included in this interval. The last part of this section, as we mentioned before, we selected a qualitative variable, `category_id`, and we estimate the population proportion of the factor `music` using the sample proportion being 0.0912 its value. This estimator is unbiased as it occurred in the continuous case, and its variance is considerably small since it decreases when the sample size grows. We have calculated a confidence interval for the population proportion which is within the interval 0.090 and 0.092, again we have checked that the estimated value is within this interval.
+
+In point [4](#inference-with-more-than-one-sample), we applied the same estimation of the population mean for the variable `views` but in this case segmented by the factors of the `category_id` variable. Then, we obtained four different values, having the greatest estimated mean of the views for the category `music`. Therefore, this sub-sample, although its category is not presented in so many other videos, it has the highest mean of visualizations. Again, since we used the sample mean as the estimator, the estimation is unbiased and the coefficient of variation is low (around 2.30% except that the one related to the factor `music` that is slightly higher, a 4.58%). We evaluated the mean squared error of the proportions of each of the factor of the qualitative variable selected before. Then, we obtained that the values associated to this error, for all the factors, are low (around $3 \times 10^{-6}$). Finally, we assessed the confidence interval for the difference of means of the population and also of the proportion with respect two categories: `film` versus `music`. In case of the difference of the means we have obtained an interval of $(-1518.663, -1518.601)$, having the sample mean difference a value of $-1518.632$, negative since we commented before, music has a mean considerably much larger. For the other case, the population proportion, we got that the true value is included in $(0.3090, 0.3199)$ and the sample difference of proportions is $0.3144$. We also tested some hypothesis, wanted to demonstrate that the means and the proportions with respect `film` and `music` are different for each characteristic. In effect, both test led to reject the null hypothesis of having the same population mean and proportion in the two different sub-samples. 
 
 ## Limitations and extensions
 
