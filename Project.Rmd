@@ -945,7 +945,7 @@ As we saw before, we drew some conclusions about the number of views per categor
 The limitations we have identified reside in the number of countries we have in our data set that, as we mentioned at the beginning of this document, are just 10: Canada, US, Germany, FR, UK, India, South Korea, Mexico and Russia. Nevertheless, since we have so many observations (195,582 rows) we can say that data are a good picture of the world state at that time, in 2018. As an extension, we could incorporate more data from other different countries to see if there is any variation in comparison with the acquired results. 
 
 \newpage
-# Apendix
+# Appendix
 
 ## Code
 
