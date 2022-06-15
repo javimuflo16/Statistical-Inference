@@ -3,7 +3,10 @@ title: |
     \vspace{5cm} 
     ![](logo.png){width=1in}  
     Trend Videos
-subtitle: "Statistical Inference | Master in Statistics for Data Science"
+subtitle: |
+          Statistical Inference | Master in Statistics for Data Science
+          
+          University Carlos III of Madrid
 author: "Javier Muñoz Flores & Luis Ángel Rodríguez García"
 date: "June 2022"
 output: 
@@ -499,7 +502,7 @@ legend('topright', legend=c('non-parametric density', 'maximum likelihood estima
 
 ## Estimators of population mean
 
-In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $\mathbb{V}\mathrm{ar}(X) = \mathbb{E}[X^{2}] - \mathbb{E}[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected and their value associated are the following: 
+In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $\mathbb{V}\mathrm{ar}[X] = \mathbb{E}[X^{2}] - \mathbb{E}[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected and their value associated are the following: 
 
 $$
 \small
@@ -532,11 +535,11 @@ $$
 
 Hence both estimators are unbiased. Now, let's calculate the the variance of each one.
 $$
-\mathbb{V}\mathrm{ar}(\hat{\mu}_{1}) = \mathbb{V}\mathrm{ar}(\bar{X}) = \mathbb{V}\mathrm{ar}\left(\frac{1}{n} \sum_{i=1}^{n} X_{i}\right) = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{V}\mathrm{ar}(X_i) =  \frac{\mathbb{V}\mathrm{ar}(X)}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}
+\mathbb{V}\mathrm{ar}[\hat{\mu}_{1}] = \mathbb{V}\mathrm{ar}[\bar{X}] = \mathbb{V}\mathrm{ar}\left[\frac{1}{n} \sum_{i=1}^{n} X_{i}\right] = \frac{1}{n^2} \sum_{i=1}^{n} \mathbb{V}\mathrm{ar}[X_i] =  \frac{\mathbb{V}\mathrm{ar}[X]}{n} = \frac{(e^{\sigma^2}-1)}{n}e^{2\mu + \sigma^2}
 $$
 
 $$
-\mathbb{V}\mathrm{ar}(\hat{\mu}_{2}) = \mathbb{V}\mathrm{ar}\left(\frac{X_{1} + X_{n}}{2}\right) = \frac{1}{4}\mathbb{V}\mathrm{ar}\left(X_i + X_n\right) =  \frac{1}{2}\mathbb{V}\mathrm{ar}(X) = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}
+\mathbb{V}\mathrm{ar}[\hat{\mu}_{2}] = \mathbb{V}\mathrm{ar}\left[\frac{X_{1} + X_{n}}{2}\right] = \frac{1}{4}\mathbb{V}\mathrm{ar}\left[X_i + X_n\right] =  \frac{1}{2}\mathbb{V}\mathrm{ar}[X] = \frac{(e^{\sigma^2}-1)}{2}e^{2\mu + \sigma^2}
 $$
 
 It can be seen that the variance of $\hat{\mu}_{2}$ is higher that the variance of $\hat{\mu}_{1}$, as the latter one depends on $n$ (the number of observations) which in our case is much larger than 2. Therefore, the estimator with smaller variance is $\hat{\mu}_{1}$.
@@ -549,7 +552,7 @@ As we have mentioned previously, the estimators selected are unbiased. Thus, we 
 
 $$
 \small
-CV_{\hat{\mu}_{1}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{1})}}{\mathbb{E}[\hat{\mu}_{1}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{n}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 =
+CV_{\hat{\mu}_{1}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}[\hat{\mu}_{1}]}}{\mathbb{E}[\hat{\mu}_{1}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}[X]}}{\sqrt{n}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)e^{2\mu + \sigma^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 =
 $$
 $$
 \small
@@ -558,7 +561,7 @@ $$
 
 We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus, $CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}\times 100 = 1.86\%$. It is also important to mention that this estimation of the variance will be used for the following sections, since it will be necessary to compute the calculations required.
 
-We follow the same procedure for $\mathrm{CV}_{\hat{\mu}_{2}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{2})}}{\mathbb{E}[\hat{\mu}_{2}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{2}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} \times 100 = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} \times 100 = 581.86\%$
+We follow the same procedure for $\mathrm{CV}_{\hat{\mu}_{2}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}[\hat{\mu}_{2}]}}{\mathbb{E}[\hat{\mu}_{2}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}[X]}}{\sqrt{2}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} \times 100 = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} \times 100 = 581.86\%$
 
 ```{r cv, echo = FALSE}
 
@@ -578,11 +581,11 @@ Since the coefficient of variation for $\hat{\mu}_1$ is much smaller than $\math
 
 ## 95% confidence interval for the population mean
 
-We approximate $\bar{X}$ of `views` by the Central Limit Theorem $\frac{\bar{X}_n-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$ for a large $n$. Hence, the 95% confidence interval for the population mean can be computed as follows $\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$. Thus:
+We approximate $\bar{X}$ of `views` by the Central Limit Theorem $\frac{\bar{X}_n-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$ for a large $n$. Hence, the 95% confidence interval for the population mean can be computed as follows $\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\alpha/2}\frac{\sigma}{\sqrt{n}}$. Thus:
 
 $$
 \small
-\mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.975}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.975}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})
+\mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.025}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.025}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})
 $$
 
 The confidence interval (upper and lower bounds) obtained for $\mu$ is $(561.1267, 561.1449)$.
@@ -624,14 +627,7 @@ rownames(props) <- c("Music")
 
 ## Estimation of the variance of the estimator of proportion
 
-Here we need to calculate the variance of the estimator $\hat{\pi_4}$:
-
-$$
-\small
-Var(\hat{\pi_4}) = \mathbb{V}\mathrm{ar}(\frac{1}{n}\sum_{i=1}^{n}X_i) = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathbb{V}\mathrm{ar}(X_i) = \frac{1}{n}\mathbb{V}\mathrm{ar}(X)
-$$
-
-Thus, since we know that $\mathbb{V}\mathrm{ar}(X)$ is equal to $\pi_k(1-\pi_k)$ and that the categorical distribution is a generalized form of the Bernoulli distribution, we can estimate the variance of $\hat{\pi_4}$ as follows $\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4}) = 4 \times 10^{-07}$. This value is considerable smaller, being a good quality of an estimator, since the variance depends on the sample size, $\frac{1}{n}$, and this value in our data set is sizeable.
+Here we need to calculate the variance of the estimator $\mathbb{V}\mathrm{ar}[\hat{\pi_4}] = \mathbb{V}\mathrm{ar}\left[\frac{1}{n}\sum_{i=1}^{n}X_i\right] = \frac{1}{n^{2}}\sum_{i=1}^{n}\mathbb{V}\mathrm{ar}[X_i] = \frac{1}{n}\mathbb{V}\mathrm{ar}[X]$. Thus, since we know that $\mathbb{V}\mathrm{ar}[X]$ is equal to $\pi_k(1-\pi_k)$ and that the categorical distribution is a generalized form of the Bernoulli distribution, we can estimate the variance of $\hat{\pi_4}$ as follows $\hat{\sigma}_{\hat{\pi_4}} = \frac{1}{n}\hat{\pi_4}(1-\hat{\pi_4}) = 4 \times 10^{-07}$. This value is considerable smaller, being a good quality of an estimator, since the variance depends on the sample size, $\frac{1}{n}$, and this value in our data set is sizeable.
 
 ```{r var_proportion_music, echo = FALSE}
 
@@ -651,7 +647,7 @@ By the CLT, we know that $\frac{\hat{\pi} - \pi}{\sqrt{\pi(1-\pi)/n}} \approx N(
 
 $$
 \small
-\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.975}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}, \hat{\pi} + Z_{0.975}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}) = (0.0869, 0.0954)
+\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.025}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}, \hat{\pi} + Z_{0.025}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}) = (0.0869, 0.0954)
 $$
 
 ```{r conf_interval_prop, echo = FALSE}
@@ -793,7 +789,7 @@ $$
 CI_{0.95}(\mu_{film}-\mu_{music}) =
 $$
 $$
-=((\hat{\mu}_{film}-\hat{\mu}_{music}) - Z_{0.975}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}, (\hat{\mu}_{film}-\hat{\mu}_{music}) + Z_{0.975}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}  
+=((\hat{\mu}_{film}-\hat{\mu}_{music}) - Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}, (\hat{\mu}_{film}-\hat{\mu}_{music}) + Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}  
 $$
 
 ```{r conf_interval_submean, echo = FALSE}
@@ -833,7 +829,7 @@ $$
 \small
 Z = \frac{\hat{\mu}_{film}-\hat{\mu}_{music}}{\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}} \approx N(0,1)
 $$
-Thus, we reject $H_0$ if $|Z| > Z_{\alpha/2}$, i.e. if $|Z| > Z_{0.025}$. The results is $|Z|=95658.03$ related to a $Z_{0.025}=1.96$. Hence, since the value of the test statistic is higher than $Z_{0.025}$ we reject the null hypothesis and we can confirm that both means are not equal at all.
+Thus, we reject $H_0$ if $|Z| > Z_{\alpha/2}$, i.e. if $|Z| > Z_{0.025}$. The results is $|Z|=95658.03$ related to a $|Z_{0.025}|=1.96$. Hence, since the value of the test statistic is higher than $Z_{0.025}$ we reject the null hypothesis and we can confirm that both means are not equal at all.
 
 ```{r hypothesis_submean_equal, echo = FALSE}
 
@@ -867,7 +863,7 @@ $$
 
 $$
 \small
-\mathrm{CI}(\pi_{film}-\pi_{music}) := (\hat\pi_{film}-\hat\pi_{music})\pm Z_{\frac{0.05}{2}}\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}
+\mathrm{CI}(\pi_{film}-\pi_{music}) := (\hat\pi_{film}-\hat\pi_{music})\pm Z_{0.025}\sqrt{\frac{\hat\pi_{film}(1-\hat\pi_{film})}{n_{film}}+\frac{\hat\pi_{music}(1-\hat\pi_{music})}{n_{music}}}
 $$
 
 Results are gathered in Table \ref{tab:ci_diff_prop}.
@@ -913,7 +909,7 @@ In Table \ref{tab:test_equal_prop} is shown the z-scored obtained and the quanti
 z_score <- diff_prop_film_music/sqrt(var_x_film+var_x_music)
 
 test_diff <- cbind(z_score, round(-qnorm(0.025), 4))
-colnames(test_diff) <- c('z-score', 'Z_{0.05/2}')
+colnames(test_diff) <- c('z-score', 'Z_{0.025}')
 
 knitr::kable(test_diff, 
              caption="Hypothesis test | Z statistic") %>% 
