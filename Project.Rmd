@@ -853,12 +853,12 @@ We have set a 95% confidence interval (the level of significance $\alpha=5$) and
 
 $$
 \small
-\mathbb{P}\left[-Z_{\alpha/2} \leq \frac{\hat\pi_{film}-\hat\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\sigma^2_{film-music}}} \leq Z_{\alpha/2} \right] = 95 \rightarrow \\
+\mathbb{P}\left[-Z_{\alpha/2} \leq \frac{\hat\pi_{film}-\hat\pi_{music}-(\pi_{film}-\pi_{music})}{\sqrt{\sigma^2_{film-music}}} \leq Z_{\alpha/2} \right] = 0.95 \rightarrow \\
 $$
 $$
 \small
 \rightarrow \mathbb{P}\left[(\hat\pi_{film}-\hat\pi_{music})-Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \leq \pi_{film}-\pi_{music} \leq
-(\hat\pi_{film}-\hat\pi_{music})+Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \right] = 95
+(\hat\pi_{film}-\hat\pi_{music})+Z_{\alpha/2}\sqrt{\sigma^2_{film-music}} \right] = 0.95
 $$
 
 $$
