@@ -500,6 +500,7 @@ legend('topright', legend=c('non-parametric density', 'maximum likelihood estima
 ## Estimators of population mean
 
 In this section, we use again the continuous variable `views` in order to calculate two different estimators of the population mean. Recall the distribution $X_{views} \sim Lognormal(\mu, \sigma)$ with mean $E[X] = e^{\mu + \frac{\sigma}{2}}$ and variance $\mathbb{V}\mathrm{ar}(X) = \mathbb{E}[X^{2}] - \mathbb{E}[X]^2 = \exp\{2\mu + 2\sigma^2\} - \exp\{2\mu + \sigma^2\} = (\exp\{\sigma^2\}-1)\exp\{2\mu + \sigma^2\}$. The estimators selected and their value associated are the following: 
+
 $$
 \small
 \hat{\mu}_{1} = \bar{X} =  561.1358 \quad \text{and} \quad \hat{\mu}_{2} = \frac{X_{1} + X_{n}}{2} = 258001.8
@@ -519,6 +520,7 @@ rownames(estimators) <- c("Estimation")
 ```
 
 It is worthy to mention that $\hat{\mu}_2$ has a higher value than $\hat{\mu}_1$. Now, let's analyze the properties of both estimators. First, we will see if any of them is unbiased.
+
 $$
 \small
 \mathbb{E}[\hat{\mu}_{1}] = \mathbb{E}[\bar{X}] = \mathbb{E}\left[\frac{1}{n} \sum_{i=1}^{n} X_{i}\right] = \frac{1}{n} \sum_{i=1}^{n} \mathbb{E}[X_i] = \mathbb{E}[X] = e^{\mu + \frac{\sigma^2}{2}}
@@ -554,7 +556,7 @@ $$
 = \frac{\sqrt{(e^{\sigma^2}-1)e^{(\mu + \frac{\sigma^2}{2})^2}}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}e^{(\mu + \frac{\sigma^2}{2})}}{\sqrt{n}e^{\mu + \frac{\sigma^2}{2}}} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{n}} \times 100
 $$
 
-We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus, $CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}\times 100 = 1.86\%$.
+We use the estimations of the model parameters carried out using the method of moments for calculating the final value of the CV, i.e. $\hat{\mu}_{mm}$ and $\hat{\sigma}^2_{mm}$. We use these specified values because they are more accurate than the ones obtained with maximum likelihood method. Thus, $CV_{\hat{\mu}_{1}} = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{n}}\times 100 = 1.86\%$. It is also important to mention that this estimation of the variance will be used for the following sections, since it will be necessary to compute the calculations required.
 
 We follow the same procedure for $\mathrm{CV}_{\hat{\mu}_{2}} = \frac{\sqrt{\mathbb{V}\mathrm{ar}(\hat{\mu}_{2})}}{\mathbb{E}[\hat{\mu}_{2}]} \times 100 = \frac{\sqrt{\mathbb{V}\mathrm{ar}(X)}}{\sqrt{2}\mathbb{E}[X]} \times 100 = \frac{\sqrt{(e^{\sigma^2}-1)}}{\sqrt{2}} \times 100 = \frac{\sqrt{(e^{\hat{\sigma}^2_{mm}}-1)}}{\sqrt{2}} \times 100 = 581.86\%$
 
@@ -576,22 +578,22 @@ Since the coefficient of variation for $\hat{\mu}_1$ is much smaller than $\math
 
 ## 95% confidence interval for the population mean
 
-We approximate $\bar{X}$ of `views` by the Central Limit Theorem $\frac{\bar{X}_n-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$ for a large $n$. Hence, the 95% confidence interval for the population mean can be computed as follows $\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$. As previously, we use the estimation of the variance $\hat{\sigma}^2_{mm}$ for computing the confidence interval. Thus:
+We approximate $\bar{X}$ of `views` by the Central Limit Theorem $\frac{\bar{X}_n-\mu}{\frac{\sigma}{\sqrt{n}}} \sim \mathcal{N}(0,1)$ for a large $n$. Hence, the 95% confidence interval for the population mean can be computed as follows $\mathrm{CI}_{0.95}(\mu) = \bar{X} \pm Z_{\frac{\alpha}{2}}\frac{\sigma}{\sqrt{n}}$. Thus:
 
 $$
 \small
-\mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.05}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})
+\mathrm{CI}_{0.95}(\mu) = (\bar{X} - Z_{0.975}\frac{\hat{\sigma}_{mm}}{\sqrt{n}}, \bar{X} + Z_{0.975}\frac{\hat{\sigma}_{mm}}{\sqrt{n}})
 $$
 
-The confidence interval (upper and lower bounds) obtained for $\mu$ is $(561.1282, 561.1435)$.
+The confidence interval (upper and lower bounds) obtained for $\mu$ is $(561.1267, 561.1449)$.
 
 ```{r conf_interval_mean, echo = FALSE}
 
 # 95% confidence interval for the population mean
 
 sigma_mm <- sqrt(sigma2_mm)
-CI_lower <- mu_1 - qnorm(.95)*(sigma_mm/sqrt(n))
-CI_upper <- mu_1 + qnorm(.95)*(sigma_mm/sqrt(n))
+CI_lower <- mu_1 - qnorm(.975)*(sigma_mm/sqrt(n))
+CI_upper <- mu_1 + qnorm(.975)*(sigma_mm/sqrt(n))
 
 CI <- cbind(CI_lower, CI_upper)
 colnames(CI) <- c("Lower bound", "Upper bound")
@@ -649,15 +651,18 @@ By the CLT, we know that $\frac{\hat{\pi} - \pi}{\sqrt{\pi(1-\pi)/n}} \approx N(
 
 $$
 \small
-\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}}, \hat{\pi} + Z_{0.05}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n}}) = (0.090, 0.092)
+\mathrm{CI}_{0.95}(\pi) = (\hat{\pi} - Z_{0.975}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}, \hat{\pi} + Z_{0.975}\sqrt{\frac{\hat{\pi}(1-\hat{\pi})}{n_{music}}}) = (0.0869, 0.0954)
 $$
 
 ```{r conf_interval_prop, echo = FALSE}
 
 # Confidence interval for the proportion 
 
-CI_p_lower <- prop_music - qnorm(.95)*(sqrt(prop_music*(1-prop_music)/n))
-CI_p_upper <- prop_music + qnorm(.95)*(sqrt(prop_music*(1-prop_music)/n))
+x_music <-final_data$views[final_data$category_id=='Music']
+n_music <- length(x_music)
+
+CI_p_lower <- prop_music - qnorm(.975)*(sqrt(prop_music*(1-prop_music)/n_music))
+CI_p_upper <- prop_music + qnorm(.975)*(sqrt(prop_music*(1-prop_music)/n_music))
 
 CI_p <- cbind(CI_p_lower, CI_p_upper)
 colnames(CI_p) <- c("Lower bound", "Upper bound")
@@ -684,7 +689,6 @@ n <- length(final_data$views)
 x_education <- final_data$views[final_data$category_id=='Education']
 x_film <- final_data$views[final_data$category_id=='Film']
 x_leisure <- final_data$views[final_data$category_id=='Leisure']
-x_music <-final_data$views[final_data$category_id=='Music']
 
 mu_education <- mean(x_education)
 mu_film <- mean(x_film)
@@ -745,7 +749,6 @@ In this section, we are going to calculate the proportion we calculated in point
 n_education <- length(x_education)
 n_film <- length(x_film)
 n_leisure <- length(x_leisure)
-n_music <- length(x_music)
 
 prop_education <- n_education/length(final_data$category_id)
 prop_film <- n_film/length(final_data$category_id)
@@ -764,7 +767,7 @@ knitr::kable(props,
 
 Our random variable `category_id` defined as $X \sim \mathcal{M}\mathrm{ultin}(n,\boldsymbol\pi)$ with parameters $n$ and $\boldsymbol\pi$, where $n=195582$ and $\boldsymbol\pi=(\pi_1, \pi_2, \pi_3, \pi_4) = (0.2200, 0.4056, 0.2832, 0.0912)$ being $\pi_i$ so that $i=1$, $i=2$, $i = 3$ and $i = 4$ correspond to the categories `Education`, `Film`, `Leisure` and `Music`, respectively. 
 
-After proportions have been calculated, we are ready to calculate the MSE for each estimator. Since this estimator is unbiased, that $\mathrm{Bias}(\hat{\pi_i})=\mathbb{E}[\hat{\pi_i}]-\pi_i=0$ holds and then $\mathbb{E}[\hat{\pi_i}] = \pi_i = \mathbb{E}[X]$, therefore $\mathrm{MSE}(\hat{\pi_i})=\mathrm{Bias}^2(\hat{\pi_i})+\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\frac{1}{n_i}\hat{\pi}_i(1-\hat{\pi}_i)$, then $\hat{\mathrm{MSE}_i}=\frac{1}{n_i}\hat{p}_i(1-\hat{p}_i)$. In the Table \ref{tab:mse_cat_tot} is shown these estimations for each category. As we can see, the mean squared errors in all the cases are considerably small since the sample size is really large.
+After proportions have been calculated, we are ready to calculate the MSE for each estimator. Since this estimator is unbiased, that $\mathrm{Bias}(\hat{\pi_i})=\mathbb{E}[\hat{\pi_i}]-\pi_i=0$ holds and then $\mathbb{E}[\hat{\pi_i}] = \pi_i = \mathbb{E}[X]$, therefore $\mathrm{MSE}(\hat{\pi_i})=\mathrm{Bias}^2(\hat{\pi_i})+\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\mathbb{V}\mathrm{ar}[\hat{\pi_i}]=\frac{1}{n_i}\hat{\pi}_i(1-\hat{\pi}_i)$, then $\hat{\mathrm{MSE}_i}=\frac{1}{n_i}\hat{p}_i(1-\hat{p}_i)$. In the Table \ref{tab:mse_cat_tot} is shown these estimations for each category. As we can see, the mean squared errors in all the cases are considerably small since the sample size is really large. It means that all the estimators are consistent in squared mean, since it holds $\lim_{n \to \infty} MSE(\hat{\pi}) = 0$ for $i=1,2,3,4$.
 
 ```{r mse_cat_tot, echo=FALSE}
 mse_education <- 1/n_education*prop_education*(1-prop_education)
@@ -790,14 +793,14 @@ $$
 CI_{0.95}(\mu_{film}-\mu_{music}) =
 $$
 $$
-=((\hat{\mu}_{film}-\hat{\mu}_{music}) - Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}, (\hat{\mu}_{film}-\hat{\mu}_{music}) + Z_{0.025}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}  
+=((\hat{\mu}_{film}-\hat{\mu}_{music}) - Z_{0.975}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}, (\hat{\mu}_{film}-\hat{\mu}_{music}) + Z_{0.975}\sqrt{\frac{\hat{\sigma^{2}}_{film}}{n_{film}} + \frac{\hat{\sigma^{2}}_{music}}{n_{music}}}  
 $$
 
 ```{r conf_interval_submean, echo = FALSE}
 
 # Confidence interval for two subgroup of the mean 
 
-CI_submean_lower <- (mu_film - mu_music) + qnorm(.025)*
+CI_submean_lower <- (mu_film - mu_music) - qnorm(.975)*
   (sqrt((s2_mm_film / n_film) + (s2_mm_music / n_music)))
 mean_diff <- mu_film - mu_music
 CI_submean_upper <- (mu_film - mu_music) + qnorm(.975)*
